@@ -756,19 +756,12 @@ class OnlineDelivery:
                 messages = self.db.session.execute(text("SELECT * FROM messages ORDER BY id DESC")).mappings().all()
                 return render_template('admin_contact.html', messages=messages)
         
- # 1. Initialize your class
+ # Create the instance of your class
 delivery_service = OnlineDelivery(__name__)
 
-# 2. Set up the routes (this also sets up self.db)
-delivery_service.setup_routes()
-
-# 3. EXPOSE the Flask instance for Gunicorn
+# Gunicorn looks for this 'app' variable specifically
 app = delivery_service.app
 
-# --- FIX: Use the correct instance name ---
-with app.app_context():
-    delivery_service.db.create_all()
-
-# 4. Only for local PC testing
 if __name__ == "__main__":
+    # This part runs when you test locally
     app.run(debug=True)
