@@ -1,5 +1,6 @@
 from flask import Flask, render_template, redirect, request, url_for, session, flash
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import text
 import bcrypt
 from cryptography.fernet import Fernet
 import os
@@ -33,6 +34,7 @@ class OnlineDelivery:
             
             # Initialize the database here so it's available to all routes
         self.db = SQLAlchemy(self.app)
+        self.setup_routes()
         
         
     def setup_routes(self):
@@ -99,17 +101,16 @@ class OnlineDelivery:
             menus = result.mappings().all()
             return render_template("drinks_public.html", menu_list=menus)
             
-  # --- SECURITY HELPERS ---
-    # These should be methods inside the class or standalone functions
-    def hash_password(self, password):
-        return bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+    # --- SECURITY HELPERS ---
+        # These should be methods inside the class or standalone functions
+        def hash_password(self, password):
+            return bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
 
-    def check_password(self, password, hashed):
-        return bcrypt.checkpw(password.encode('utf-8'), hashed.encode('utf-8'))
+        def check_password(self, password, hashed):
+            return bcrypt.checkpw(password.encode('utf-8'), hashed.encode('utf-8'))
 
-    # --- LOGIN & REGISTER ROUTES ---
-    def setup_routes(self):
-        # ... (Keep your other routes) ...
+        # --- LOGIN & REGISTER ROUTES ---
+            # ... (Keep your other routes) ...
 
         @self.app.route("/login")
         def login():
