@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile</title>
+    <link rel="stylesheet" href="static/profile.css"> 
+</head>
+<body>
+    
+    <a href="{{ url_for('home') }}" class="back">Back</a> 
+    <div class="divv">
+        <h1>Profile</h1>
+        <div class="picture">
+            <img src="{{ user_info[7] if user_info[7] else url_for('static', filename='Default.png') }}" alt="Profile Picture" class="profile-picture">
+            <div class="icon">
+                <img src="{{ url_for('static', filename='change.png.png') }}" alt="Edit" class="edit-icon" onclick="document.getElementById('modal').style.display='block'">
+            </div>
+        </div>
+        <p>First Name: {{ user_info[0] }}</p>
+        <p>Last Name: {{ user_info[1] }}</p>
+        <p>Age: {{ user_info[2] }}</p>
+        <p>Address: {{ user_info[3] }}</p>
+        <p>Contact: {{ user_info[4] }}</p>
+        <form action="/update_profile" method="GET">
+            <button type="submit">Update</button>
+        </form>
+        <form action="/logout" method="POST">
+            <button type="submit">Logout</button>
+        </form>
+    </div>
+
+    <div id="modal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="document.getElementById('modal').style.display='none'">&times;</span>
+            <h2>Change Profile Picture</h2>
+            <form action="/profile" method="POST" enctype="multipart/form-data">
+                <input type="file" name="profile_picture" accept="image/*" required>
+                <button type="submit">Upload</button>
+            </form>
+            <form action="/profile" method="POST">
+                <input type="hidden" name="delete" value="true">
+                <button type="submit" class="delete">Delete Profile Picture</button>
+            </form>
+            
+            </form>
+        </div>
+    </div>
+
+    <script>
+        var modal = document.getElementById('modal');
+
+        window.onclick = function(event) {
+            if (event.target == modal) {
+                modal.style.display = "none";
+            }
+        }
+    </script>
+</body>
+</html>

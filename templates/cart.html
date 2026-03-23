@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Cart</title>
+    <link rel="stylesheet" href="static/cart.css">
+</head>
+<body>
+    <a href="{{ url_for('home') }}" class="back">Back</a> 
+    <form action="{{ url_for('history') }}" method="POST">
+        <button type="submit" class="history">History</button>
+    </form> 
+    <div class="container">
+        <div class="cart-section">
+            <h1>Your Cart</h1>
+            <form action="{{ url_for('confirmation') }}" method="POST">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Select</th>
+                            <th>Image</th>
+                            <th>Item</th>
+                            <th>Quantity</th>
+                            <th>Price</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in cart_items %}
+                        <tr>
+                            <td><input type="checkbox" name="selected_items" value="{{ item[0] }}"></td>
+                            <input type="hidden" name="item_id" value="{{ item[0] }}">
+                            <td><img src="{{ item[4] }}" alt="{{ item[1] }}" width="100" height="100"></td>
+                            <td>{{ item[1] }}</td>
+                            <td>{{ item[2] }}</td>
+                            <td>₱{{ item[5] }}</td>
+                            <td>
+                                <button type="submit" 
+                                        formaction="/delete" 
+                                        name="id" 
+                                        value="{{ item[0] }}" 
+                                        class="delete-btn"
+                                        onclick="return confirm('Remove this item from cart?')">
+                                    Delete
+                                </button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                <input type="hidden" name="user_name" value="{{ user_info[0] }} {{ user_info[1] }}">
+                <input type="hidden" name="address" value="{{ user_info[2] }}">
+                <input type="hidden" name="number" value="{{ user_info[3] }}">
+                <button type="submit" class="order-btn">Place Order</button>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

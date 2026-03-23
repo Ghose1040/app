@@ -1,0 +1,135 @@
+
+body, h1, p, table {
+    font-family: Arial, sans-serif;
+    background-color: #f9f9f9;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: #f1f1f1;
+    padding: 20px;
+}
+
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: center;
+}
+
+.cart-section {
+    width: 100%;
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+h1 {
+    text-align: center;
+    color: #333;
+    font-size: 28px;
+    margin-bottom: 20px;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+}
+
+th, td {
+    padding: 15px;
+    text-align: center;
+    border-bottom: 1px solid #e0e0e0;
+    font-size: 16px;
+    color: #333;
+}
+
+th {
+    background-color: #f7f7f7;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+td img {
+    border-radius: 8px;
+}
+
+p {
+    text-align: center;
+    font-size: 22px;
+    font-weight: bold;
+    color: #333;
+    margin-top: 20px;
+}
+
+button {
+    width: 140px;
+    padding: 12px;
+    background-color: rgb(0, 26, 255);
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+button:hover {
+    background-color: rgb(0, 26, 255);
+}
+
+.place-order-btn {
+    background-color: rgb(0, 26, 255);
+}
+
+.place-order-btn:hover {
+    background-color: rgb(0, 26, 255);
+}
+
+.delete-btn {
+    background-color: rgb(0, 26, 255);
+    margin-top: 10px;
+}
+
+.delete-btn:hover {
+    background-color: rgb(1, 13, 116);
+}
+
+.back {
+    display: inline-block;
+    background-color: rgb(0, 26, 255);
+    color: white;
+    border: none;
+    border-radius: 5px; 
+    padding: 10px 15px; 
+    text-decoration: none; 
+    font-size: 1em;
+    margin-right: 10px; 
+    cursor: pointer; 
+   
+}
+
+.back:hover {
+    background-color: rgb(0, 10, 104);
+}
+
+.history {
+    color: rgb(255, 255, 255);
+    font-size: 15px;
+    font-weight: bold;
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background-color:rgb(0, 26, 255);;
+    cursor: pointer; 
+   
+}
+
+.history:hover {
+    background-color: rgb(0, 11, 105);
+}

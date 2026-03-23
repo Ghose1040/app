@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Update Profile</title>
+    <link rel="stylesheet" href="static/update_profile.css"> 
+</head>
+<body>
+    <div class="divv">
+        <h1>Update Profile</h1>
+        <form action="{{ url_for('update_profile') }}" method="POST" enctype="multipart/form-data">
+            <div class="field">
+                <label for="firstname">First Name:</label>
+                <input type="text" id="firstname" name="firstname" value="{{ user_info[0] }}" required>
+            </div>
+            
+            <div class="field">
+                <label for="lastname">Last Name:</label>
+                <input type="text" id="lastname" name="lastname" value="{{ user_info[1] }}" required>
+            </div>
+            
+            <div class="field">
+                <label for="age">Age:</label>
+                <input type="number" id="age" name="age" value="{{ user_info[2] }}" required>
+            </div>
+            
+            <div class="field">
+                <label for="address">Address:</label>
+                <input type="text" id="address" name="address" value="{{ user_info[3] }}" required>
+            </div>
+            
+            <div class="field">
+                <label for="contact">Contact:</label>
+                <input type="text" id="contact" name="contact" value="{{ user_info[4] }}" required>
+            </div>
+
+            <div class="field">
+                <label for="username">Username:</label>
+                <input type="text" id="username" name="username" value="{{ user_info[5] }}"  >
+            </div>
+
+            <div class="field">
+                <label for="password">Password:</label>
+                <input type="text" id="password" name="password" value="{{ user_info[6] }}" >
+            </div>
+
+            <div class="field">
+                <label for="profile">Profile:</label>
+                <input type="file" id="profile" name="profile" accept="image/*" value="{{ user_info[7] }}" >
+            </div>
+            
+            
+            <button type="submit">Update Profile</button>
+        </form>
+    
+    </div>
+</body>
+</html>

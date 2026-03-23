@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>all_menu</title>
+    <link rel="stylesheet" href="static/all_menu.css">
+</head>
+<body>
+    <nav class="nav">
+        <div class="logo">
+            <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo">
+            <h1>Jobillee</h1>
+        </div>
+        <ul>
+            <li><a href="{{ url_for('admin') }}">Home</a></li>
+            <li><a href="{{ url_for('orders') }}">Orders</a></li>
+            <li><a href="{{ url_for('accounts') }}">Accounts</a></li>
+            <li><a href="{{ url_for('edit_menu') }}">Add Menu</a></li>
+            <li><a href="{{ url_for('admin_menu') }}"> Update Menu</a></li>
+            <li><a href="{{ url_for('admin_contact') }}">Contacts</a></li>
+            
+        </ul>
+    </nav>
+    <ul>      
+    
+</nav>
+
+        <ul>
+            <li><a href="{{ url_for('all_menu') }}">Home</a></li>
+            <li><a href="{{ url_for('admin_meal') }}">Meal</a></li>
+            <li><a href="{{ url_for('admin_burger') }}">Burgers</a></li>
+            <li><a href="{{ url_for('admin_snack') }}">Snacks</a></li>
+            <li><a href="{{ url_for('admin_drinks') }}">Drinks</a></li>
+            <li><a href="{{ url_for('admin_dessert') }}">Desserts</a></li>
+            <li><a href="{{ url_for('admin') }}">Back</a></li>
+        </ul>
+    </nav>
+    <div class="menu-grid">
+        {% for item in menu_list %}
+        <div class="menu-item">
+            
+            <form action="/update_menu" method="POST">
+                    <label><img src="{{ item[3] }}" alt="{{ item[0] }}"></label>
+                    <input type="hidden" name="img" value="{{ item[3] }}">
+                    <input type="hidden" name="id" value="{{ item[0] }}">
+                    <label>{{ item[2] }}</label>
+                    <input type="hidden" name="price" value="{{ item[2] }}">
+                    <label>{{ item[1] }}</label>
+                    <input type="hidden" name="name" value="{{ item[1] }}">
+                    <button type="submit">Update</button>
+            </form>
+        </div>
+        {% endfor %}
+    </div>
+    
+
+
+
+</body>
+</html>

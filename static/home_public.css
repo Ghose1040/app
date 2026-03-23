@@ -1,0 +1,229 @@
+body {
+    background-color: lightgray;
+    margin: 0;
+    font-family: Arial;
+}
+
+.logo {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+.logo h1 {
+    font-size: 40px;
+}
+
+.logo img {
+    width: 100px;
+}
+
+.nav {
+    background-color: rgb(17, 0, 255);
+    width: 250px;
+    height: 100vh;
+    position: fixed;
+    top: 0;
+    left: 0;        
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.nav .logo {
+    display: flex;
+    align-items: center; 
+    margin-top: 20px;
+}
+
+.nav .logo img {
+    width: 80px; 
+    height: auto;
+}
+
+.nav .logo h1 {
+    font-size: 35px;
+    margin-left: 10px;
+    color: white;
+    font-weight: bold;
+}
+
+.nav ul {
+    list-style: none;
+    padding: 0;
+    margin: 20px 0 0 0;
+    width: 100%; 
+}
+
+.nav ul li {
+    width: 100%; 
+}
+
+.nav ul li a {
+    display: block;
+    text-decoration: none;
+    font-size: 20px;
+    padding: 25px; 
+    color: white;
+    text-align: center;    
+}
+
+.nav ul li a:hover {
+    background-color: rgba(42, 23, 212, 0.705); 
+}
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.searchbar {
+    display: flex;
+    padding: 20px;
+    position: relative;
+    left: 300px;
+}
+
+.searchbar input {
+    width: 500px;
+    padding: 10px;
+    font-size: 18px;
+    border-radius: 20px;
+}
+
+.searchbar button {
+    width: 100px;
+    padding: 10px;
+    font-size: 18px;
+    background-color: rgb(4, 0, 255);
+    color: white;
+    border: none;
+    border-radius: 20px;
+    margin-left: 10px;
+    cursor: pointer;
+}
+
+.icons {
+    display: flex;
+    gap: 20px;
+    position: relative;
+    right: 20px;
+}
+
+.account img, .cart img {
+    width: 50px;
+    height: 50px;
+    cursor: pointer;
+}
+
+.featured {
+    text-align: center;
+    font-size: 30px;
+    margin-top: 20px;
+    margin-left: 250px;
+}
+
+.select {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    margin-top: 30px;
+    margin-left: 200px;
+}
+
+.selectt {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+    max-width: 1200px;
+    padding: 20px;
+    text-align: center;
+}
+
+.selectt a {
+    display: block;
+    position: relative;
+    color: red;
+    text-decoration: none;
+    font-size: 18px;
+}
+
+.selectt img {
+
+    width: 500px;
+    height: 350px; 
+    border-radius: 10px;
+    transition: transform 0.3s ease-in-out;
+    }
+    
+
+
+.selectt a .select-button {
+    position: absolute;
+    bottom: 50px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: rgba(255, 255, 255, 1);
+    padding: 10px 30px;
+    border-radius: 20px;
+    cursor: pointer;
+
+}
+
+.selectt p {
+    margin-top: 10px;
+    font-size: 18px;
+}
+
+.footer {
+    background-color: rgb(212, 201, 201);
+    color: black;
+    text-align: center;
+    padding: 20px 0;
+    width: 100%;
+    box-shadow: 0 5px 10px rgba(0, 0, 0, 1);
+    margin-top: 8%;
+}
+
+.footers ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 50px;
+}
+
+.footers ul img {
+    width: 150px;
+    align-self: center; 
+    
+}
+
+.footers ul li a {
+    text-decoration: none;
+    color: black; 
+    font-size: 15px;
+    position: relative;
+    left: 90px;
+}
+
+.footers ul li a:hover {
+    text-decoration: underline;
+}
+.cart-count {
+    color: rgb(255, 0, 0);
+    font-size: 15px;
+    font-weight: bold;
+    position: absolute;
+    top: -10px;
+    right: -10px;
+    background-color: white;
+    border: 2px solid red;
+    border-radius: 50%;
+    padding: 3px 8px;
+   
+}

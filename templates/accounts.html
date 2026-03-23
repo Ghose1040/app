@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Accounts</title>
+    <link rel="stylesheet" href="static/admin_account.css"> 
+</head>
+<body>
+
+    <nav class="nav">
+        <div class="logo">
+            <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo">
+            <h1>Jobillee</h1>
+        </div>
+        <ul>
+            <li><a href="{{ url_for('admin') }}">Home</a></li>
+            <li><a href="{{ url_for('orders') }}">Orders</a></li>
+            <li><a href="{{ url_for('accounts') }}">Accounts</a></li>
+            <li><a href="{{ url_for('edit_menu') }}">Add Menu</a></li>
+            <li><a href="{{ url_for('admin_menu') }}"> Update Menu</a></li>
+            <li><a href="{{ url_for('admin_contact') }}">Contacts</a></li>
+            
+        </ul>
+    </nav>
+    <ul>      
+    
+</nav>
+    
+    <div class="main-content">
+        <div class="header-section">
+            <h2>User Accounts</h2>
+            <p style="color: var(--text-muted);">Manage registered users and access permissions.</p>
+        </div>
+
+        <div class="menu-grid">
+            {% for item in user_info %}
+            <div class="menu-item">
+                <div class="info-row">
+                    <span class="info-label">Full Name</span>
+                    <span class="info-value">{{ item[1] }} {{ item[2] }}</span>
+                </div>
+
+                <div class="info-row">
+                    <span class="info-label">Username</span>
+                    <span class="info-value">{{ item[6] }}</span>
+                </div>
+
+                <div class="info-row">
+                    <span class="info-label">Contact & Address</span>
+                    <span class="info-value">{{ item[5] }}<br><small>{{ item[4] }}</small></span>
+                </div>
+
+                <div class="info-row">
+                    <span class="info-label">Hashed Password</span>
+                    <!-- word-break: break-all in CSS handles the length of this string -->
+                    <span class="info-value" style="font-family: monospace; font-size: 0.8rem; color: #888;">
+                        {{ item[7] }}
+                    </span>
+                </div>
+
+                <div class="info-row">
+                    <span class="info-label">Account Status</span>
+                    <span class="info-value">
+                        <span class="status-badge {{ 'status-active' if item[9] == 'Active' else 'status-restricted' }}">
+                            {{ item[9] }}
+                        </span>
+                    </span>
+                </div>
+
+                <div class="actions">
+                    <!-- Update Status to Active -->
+                    <form action="{{ url_for('restricted_remove') }}" method="POST" onsubmit="return confirm('Activate this account?')">
+                        <input type="hidden" name="Id" value="{{ item[0] }}">
+                        <input type="hidden" name="status" value="Active">
+                        <button type="submit" class="btn-active">Activate</button>
+                    </form>
+
+                    <!-- Update Status to Restricted -->
+                    <form action="{{ url_for('restricted') }}" method="POST" onsubmit="return confirm('Restrict this account?')">
+                        <input type="hidden" name="Id" value="{{ item[0] }}">
+                        <input type="hidden" name="status" value="Restricted">
+                        <button type="submit" class="btn-restrict">Restrict</button>
+                    </form>
+
+                    <!-- Delete Account -->
+                    <form action="/admin_delete" method="POST" onsubmit="return confirm('PERMANENTLY delete this account?')">
+                        <input type="hidden" name="Id" value="{{ item[0] }}">
+                        <button type="submit" class="btn-delete">Delete</button>
+                    </form>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</body>
+</html>

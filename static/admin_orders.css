@@ -1,0 +1,138 @@
+body {
+    font-family: Arial, sans-serif;
+    height: 100vh;
+    margin: 0;
+}
+
+.logo {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+.logo h1 {
+    font-size: 40px;
+}
+
+.logo img {
+    width: 100px;
+}
+
+.nav {
+    background-color: rgb(25, 0, 255);
+    width: 250px;
+    height: 100vh;
+    position: fixed;
+    top: 0;
+    left: 0;        
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.nav .logo {
+    display: flex;
+    align-items: center; 
+    margin-top: 20px;
+}
+
+.nav .logo img {
+    width: 80px; 
+    height: auto;
+}
+
+.nav .logo h1 {
+    font-size: 35px;
+    margin-left: 10px;
+    color: white;
+    font-weight: bold;
+}
+
+.nav ul {
+    list-style: none;
+    padding: 0;
+    margin: 20px 0 0 0;
+    width: 100%; 
+}
+
+.nav ul li {
+    width: 100%; 
+}
+
+.nav ul li a {
+    display: block;
+    text-decoration: none;
+    font-size: 20px;
+    padding: 25px; 
+    color: white;
+    text-align: center;    
+}
+
+.nav ul li a:hover {
+    background-color:rgb(10, 0, 97);
+}
+
+.orders {
+    margin-left: 270px;
+    padding: 20px;
+    background-color: white;
+    border-radius: 10px;
+    max-width: 1200px;
+    margin-top: 30px;
+}
+
+.orders h1 {
+    margin-bottom: 20px;
+    font-size: 28px;
+    color: #34495e;
+    text-align: center;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+}
+
+thead {
+    background-color: rgb(25, 0, 255);
+    color: white;
+}
+
+thead th {
+    padding: 15px;
+    font-size: 16px;
+    text-align: left;
+}
+
+tbody td {
+    padding: 15px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+
+tbody tr:hover {
+    background-color: #f2f2f2;
+}
+
+.success-btn {
+    background-color: rgb(25, 0, 255);
+    color: white;
+    padding: 8px 15px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.success-btn:hover {
+    background-color:rgb(10, 0, 100);
+}
+
+.total-amount {
+    margin-top: 20px;
+    font-size: 20px;
+    font-weight: bold;
+    color: #34495e;
+}

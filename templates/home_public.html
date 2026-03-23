@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home</title>
+    <link rel="stylesheet" href="static/home_public.css">
+</head>
+<body>
+    <nav class="nav">
+        <div class="logo">
+            <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo">
+            <h1>Jobillee</h1>
+        </div>
+        <ul>
+            <li><a href="{{ url_for('home_public') }}">Home</a></li>
+            <li><a href="{{ url_for('login') }}">Log in</a></li>
+        </ul>
+    </nav>
+
+    <div class="header">
+        <div class="searchbar">
+            <input type="text" placeholder=" ">
+            <button>Search</button>
+        </div>
+        <div class="icons">
+            <a href="{{ url_for('login') }}" class="account">
+                <img src="{{ url_for('static', filename='account.png') }}" alt="Account" title="Account">
+            </a>
+            <a href="{{ url_for('login') }}" class="cart">
+                <img src="{{ url_for('static', filename='cart.png') }}" alt="Cart" title="Cart">
+            </a>
+        </div>
+    </div>
+
+    <div class="select">
+        <div class="selectt">
+            <a href="{{ url_for('bestseller_public') }}">
+                <img src="{{ url_for('static', filename='bestsellers.jpg') }}" alt="Bestsellers" title="Bestsellers">
+                <div class="select-button">Select</div>
+            </a>
+            <a href="{{ url_for('newproducts_public') }}">
+                <img src="{{ url_for('static', filename='newproducts.jpg') }}" alt="New Products" title="New Products">
+                <div class="select-button">Select</div>
+            </a>
+            <a href="{{ url_for('filipinofoods_public') }}">
+                <img src="{{ url_for('static', filename='filipinofoods.png') }}" alt="Filipino Foods" title="Filipino Foods">
+                <div class="select-button">Select</div>
+            </a>
+            <a href="{{ url_for('burger_public') }}">
+                <img src="{{ url_for('static', filename='burgerss.jpg') }}" alt="Burgers" title="Burgers">
+                <div class="select-button">Select</div>
+            </a>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="footers">
+            <ul>
+                <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo">
+                <li><a href="{{ url_for('aboutus') }}">About</a></li>
+                <li><a href="{{ url_for('contact') }}">Contact Us</a></li>
+                <li><a href="{{ url_for('login') }}">Administration </a></li>
+                <li><a href="{{ url_for('terms') }}">Terms and Conditions</a></li>
+                <li><a href="{{ url_for('privacy') }}">Privacy Policy</a></li>
+
+            </ul>
+        
+        </div>
+    </footer>
+
+</body>
+</html>

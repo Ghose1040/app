@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='admin.css') }}">
+</head>
+<body>
+
+<nav class="nav">
+    <div class="logo">
+        <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo">
+        <h1>Jobillee</h1>
+    </div>
+    <ul>
+        <li><a href="{{ url_for('admin') }}">Home</a></li>
+        <li><a href="{{ url_for('orders') }}">Orders</a></li>
+        <li><a href="{{ url_for('accounts') }}">Accounts</a></li>
+        <li><a href="{{ url_for('edit_menu') }}">Add Menu</a></li>
+        <li><a href="{{ url_for('admin_menu') }}">Update Menu</a></li>
+        <li><a href="{{ url_for('admin_contact') }}">Contacts</a></li>
+    </ul>
+</nav>
+
+<div class="dashboard-container">
+    <h2>Daily Sales Dashboard</h2>
+    <table class="sales-table">
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Item Name</th>
+                <th>Total Quantity Sold</th>
+                <th>Price per Item (₱)</th>
+                <th>Total Price (₱)</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for record in sales_data %}
+            <tr>
+                <td>{{ record[1] }}</td>  
+                <td>{{ record[0] }}</td> 
+                <td>{{ record[2] }}</td>  
+                <td>₱{{ record[3] }}</td>  
+                <td>₱{{ record[4] }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div class="overall-total">
+        <h3>Overall Total Price: ₱{{ overall_total_price }}</h3>
+    </div>
+</div>
+
+</body>
+</html>

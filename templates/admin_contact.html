@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - View Messages</title>
+    <link rel="stylesheet" href="static/admin_contact.css">
+</head>
+<body>
+    <nav class="nav">
+        <div class="logo">
+            <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo">
+            <h1>Jobillee</h1>
+        </div>
+        <ul>
+            <li><a href="{{ url_for('admin') }}">Home</a></li>
+            <li><a href="{{ url_for('orders') }}">Orders</a></li>
+            <li><a href="{{ url_for('accounts') }}">Accounts</a></li>
+            <li><a href="{{ url_for('edit_menu') }}">Add Menu</a></li>
+            <li><a href="{{ url_for('admin_menu') }}">Update Menu</a></li>
+            <li><a href="{{ url_for('admin_contact') }}">Contacts</a></li>
+        </ul>
+    </nav>
+
+    <h2>User Messages</h2>
+
+    <div class="menu-grid">
+        {% if messages %}
+        {% for message in messages %}
+        <div class="menu-item">
+            <label>Name: {{ message[0] }}</label>
+            <label>Email: {{ message[1] }}</label>
+            <label>Message: {{ message[2] }}</label><br>
+            <label>Submitted at: {{ message[3] }}</label>
+        </div>
+        {% endfor %}
+        {% else %}
+        <p>No messages yet.</p>
+        {% endif %}
+    </div>
+</body>
+</html>

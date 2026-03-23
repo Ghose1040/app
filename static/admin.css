@@ -1,0 +1,132 @@
+body {
+    font-family: Arial, sans-serif;
+    height: 100vh;
+}
+
+.logo {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+.logo h1 {
+    font-size: 40px;
+}
+
+.logo img {
+    width: 100px;
+}
+
+.nav {
+    background-color: rgb(25, 0, 255);
+    width: 250px;
+    height: 100vh;
+    position: fixed;
+    top: 0;
+    left: 0;        
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.nav .logo {
+    display: flex;
+    align-items: center; 
+    margin-top: 20px;
+}
+
+.nav .logo img {
+    width: 80px; 
+    height: auto;
+}
+
+.nav .logo h1 {
+    font-size: 35px;
+    margin-left: 10px;
+    color: white;
+    font-weight: bold;
+}
+
+.nav ul {
+    list-style: none;
+    padding: 0;
+    margin: 20px 0 0 0;
+    width: 100%; 
+}
+
+.nav ul li {
+    width: 100%; 
+}
+
+.nav ul li a {
+    display: block;
+    text-decoration: none;
+    font-size: 20px;
+    padding: 25px; 
+    color: white;
+    text-align: center;    
+}
+
+.nav ul li a:hover {
+    background-color: rgb(10, 0, 97);
+}
+
+.dashboard-container {
+    margin-left: 270px; /* To account for the fixed nav */
+    padding: 30px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+    background-color: #fff;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.dashboard-container h2 {
+    font-size: 28px;
+    color: rgb(25, 0, 255);
+    margin-bottom: 20px;
+    font-weight: bold;
+}
+
+/* Table Styling */
+.sales-table {
+    width: 100%;
+    max-width: 1000px;
+    border-collapse: collapse;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.sales-table th, .sales-table td {
+    padding: 12px 15px;
+    text-align: left;
+}
+
+.sales-table th {
+    background-color: #e0e0e0;
+    font-weight: bold;
+    color: #333;
+    border-bottom: 2px solid #ccc;
+}
+
+.sales-table td {
+    background-color: #f9f9f9;
+    border-bottom: 1px solid #ddd;
+}
+
+.sales-table tr:nth-child(even) {
+    background-color: #f2f2f2;
+}
+
+.sales-table tr:hover {
+    background-color: #e0e0e0;
+}
+
+/* Overall Total */
+.overall-total {
+    margin-top: 20px;
+    font-size: 22px;
+    font-weight: bold;
+    color: rgb(25, 0, 255); 
+}

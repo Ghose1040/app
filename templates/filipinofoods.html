@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meal</title>
+    <link rel="stylesheet" href="static/home.css">
+<body>
+    <nav class="nav">
+        <div class="logo">
+            <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo">
+            <h1>Jobillee</h1>
+        </div>
+        <ul>
+            <li><a href="{{ url_for('home') }}">Home</a></li>
+            <li><a href="{{ url_for('bestsellers') }}">Best Sellers</a></li>
+            <li><a href="{{ url_for('newproducts') }}">New Products</a></li>
+            <li><a href="{{ url_for('filipinofoods') }}">Filipino Foods</a></li>
+            <li><a href="{{ url_for('burger') }}">Burgers</a></li>
+            <li><a href="{{ url_for('meal') }}">Meal</a></li>
+            <li><a href="{{ url_for('snack') }}">Snacks</a></li>
+            <li><a href="{{ url_for('drinks') }}">Drinks N' Desserts</a></li>
+        </ul>
+    </nav>
+
+    <div class="header">
+        <div class="searchbar">
+            <form action="{{ url_for('search') }}" method="POST">
+                <input type="search" name="search" placeholder="Search for a menu item">
+                <button type="submit">Search</button>
+            </form>
+        </div>
+        <div class="icons">
+            <a href="{{ url_for('profile') }}" class="account">
+                <img src="{{ url_for('static', filename='account.png') }}" alt="Account" title="Account">
+            </a>
+            <a href="{{ url_for('cart') }}" class="cart">
+                <img src="{{ url_for('static', filename='cart.png') }}" alt="Cart" title="Cart">
+                {% if cart_count > 0 %}
+                <div>
+                    <span class="cart-count">{{ cart_count }}</span>
+                </div>
+            {% endif %}
+            </a>
+        </div>
+    </div>
+
+    <p class="featured">Featured Menu</p>
+
+    <div class="menu-grid">
+        {% for item in menu_list %}
+        <div class="menu-item">
+            <img src="{{ item[3] }}" alt="{{ item[0] }}">
+            <p>₱{{ item[2] }}</p>
+            <p>{{ item[1] }}</p>
+            <form action="{{ url_for('add_to_cart_filipinofoods') }}" method="POST">
+                <input type="hidden" name="item_name" value="{{ item[1] }}">
+                <input type="hidden" name="item_price" value="{{ item[2] }}">
+                <input type="hidden" name="item_img" value="{{ item[3] }}">
+                <label for="quantity">Quantity:</label>
+                <input type="number" name="quantity" value="1" min="1">
+                <button type="submit">Add to Cart</button>
+            </form>
+            <form action="{{ url_for('place_the_order') }}" method="POST">
+                <input type="hidden" name="item_name" value="{{ item[1] }}">
+                <input type="hidden" name="item_price" value="{{ item[2] }}">
+                <input type="hidden" name="item_img" value="{{ item[3] }}">
+                <input type="hidden" name="quantity" value="1">
+                <input type="hidden" name="name" value="{{ user_info[0] }} {{ user_info[1] }}">
+                <input type="hidden" name="address" value="{{ user_info[2] }}">
+                <input type="hidden" name="number" value="{{ user_info[3] }}">
+                <button type="submit" class="delete-btn">Place Order</button>
+            </form>
+        </div>
+        {% endfor %}
+    </div>
+    <footer class="footer">
+        <div class="footers">
+            <ul>
+                <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo">
+                <li><a href="{{ url_for('aboutus') }}">About</a></li>
+                <li><a href="{{ url_for('contact') }}">Contact Us</a></li>
+                <li><a href="{{ url_for('login') }}">Administration </a></li>
+                <li><a href="{{ url_for('terms') }}">Terms and Conditions</a></li>
+                <li><a href="{{ url_for('privacy') }}">Privacy Policy</a></li>
+            </ul>
+        </div>
+    </footer>
+</body>
+</html>

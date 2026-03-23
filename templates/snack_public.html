@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meal</title>
+    <link rel="stylesheet" href="static/home.css">
+</head>
+<body>
+    <nav class="nav">
+        <div class="logo">
+            <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo">
+            <h1>Jobillee</h1>
+        </div>
+        <ul>
+            <li><a href="{{ url_for('home_public') }}">Home</a></li>
+            <li><a href="{{ url_for('burger_public') }}">Burgers</a></li>
+            <li><a href="{{ url_for('meal_public') }}">Meal</a></li>
+            <li><a href="{{ url_for('snack_public') }}">Snacks</a></li>
+            <li><a href="{{ url_for('drinks_public') }}">Drinks N' Desserts</a></li>
+            
+        </ul>
+    </nav>
+
+    <div class="header">
+        <div class="searchbar">
+            <input type="text" placeholder=" ">
+            <button>Search</button>
+        </div>
+        <div class="icons">
+            <a href="{{ url_for('login') }}" class="account">
+                <img src="{{ url_for('static', filename='account.png') }}" alt="Account" title="Account">
+            </a>
+            <a href="{{ url_for('login') }}" class="cart">
+                <img src="{{ url_for('static', filename='cart.png') }}" alt="Cart" title="Cart">
+            </a>
+        </div>
+    </div>
+
+    <p class="featured">Featured Menu</p>
+
+    <div class="menu-grid">
+        {% for item in menu_list %}
+        <div class="menu-item">
+            <img src="{{ item[3] }}" alt="{{ item[0] }}">
+            <p>₱{{ item[2] }}</p>
+            <p>{{ item[1] }}</p>
+            {% if session.get('logged_in') %}
+            <form action="{{ url_for('login') }}" method="POST",>
+                <input type="hidden" name="item_name" value="{{ item[1] }}">
+                <input type="hidden" name="item_price" value="{{ item[2] }}">
+                <input type="hidden" name="item_img" value="{{ item[3] }}">
+                <label for="quantity">Quantity:</label>
+                <input type="number" name="quantity" value="1" min="1">
+                <button type="submit">Add to Cart</button>
+            </form>
+            {% else %}
+        <form action="{{ url_for('login') }}" method="GET">
+            <input type="hidden" name="redirect" value="{{ url_for('bestseller_public') }}">
+            <button type="submit" class="login-prompt">Login to Add to Cart</button>
+        </form>
+        {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+
+    <footer class="footer">
+        <div class="footers">
+            <ul>
+                <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo">
+                <li><a href="{{ url_for('aboutus') }}">About</a></li>
+                <li><a href="{{ url_for('contact') }}">Contact Us</a></li>
+                <li><a href="{{ url_for('login') }}">Administration </a></li>
+                <li><a href="{{ url_for('terms') }}">Terms and Conditions</a></li>
+                <li><a href="{{ url_for('privacy') }}">Privacy Policy</a></li>
+                
+            </ul>
+        </div>
+    </footer>
+</body>
+</html>

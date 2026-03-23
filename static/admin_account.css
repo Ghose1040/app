@@ -1,0 +1,192 @@
+body {
+    font-family: Arial, sans-serif;
+    height: 100vh;
+}
+
+.logo {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+.logo h1 {
+    font-size: 40px;
+}
+
+.logo img {
+    width: 100px;
+}
+
+.nav {
+    background-color: rgb(25, 0, 255);
+    width: 250px;
+    height: 100vh;
+    position: fixed;
+    top: 0;
+    left: 0;        
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.nav .logo {
+    display: flex;
+    align-items: center; 
+    margin-top: 20px;
+}
+
+.nav .logo img {
+    width: 80px; 
+    height: auto;
+}
+
+.nav .logo h1 {
+    font-size: 35px;
+    margin-left: 10px;
+    color: white;
+    font-weight: bold;
+}
+
+.nav ul {
+    list-style: none;
+    padding: 0;
+    margin: 20px 0 0 0;
+    width: 100%; 
+}
+
+.nav ul li {
+    width: 100%; 
+}
+
+.nav ul li a {
+    display: block;
+    text-decoration: none;
+    font-size: 20px;
+    padding: 25px; 
+    color: white;
+    text-align: center;    
+}
+
+.nav ul li a:hover {
+    background-color: rgb(10, 0, 99);
+}
+
+h2 {
+    margin-left: 270px;
+}
+
+/* Main Content Area */
+        .main-content {
+            margin-left: 240px;
+            padding: 40px;
+            width: calc(100% - 240px);
+        }
+
+        .header-section {
+            margin-bottom: 30px;
+        }
+
+        .header-section h2 {
+            margin: 0;
+            font-size: 1.8rem;
+            color: #222;
+        }
+
+        /* Grid Layout for Accounts */
+        .menu-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 25px;
+        }
+
+        .menu-item {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.07);
+            border: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .info-row {
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 12px;
+            border-bottom: 1px solid #f0f0f0;
+            padding-bottom: 8px;
+        }
+
+        .info-row:last-of-type {
+            border-bottom: none;
+        }
+
+        .info-label {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            letter-spacing: 0.5px;
+            margin-bottom: 4px;
+            font-weight: 600;
+        }
+
+        .info-value {
+            font-size: 0.95rem;
+            color: var(--text-main);
+            word-break: break-all; /* Prevents hashed passwords from overlapping */
+            line-height: 1.4;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+
+        .status-active { background: #e8f5e9; color: #2e7d32; }
+        .status-restricted { background: #ffebee; color: #c62828; }
+
+        /* Actions Section */
+        .actions {
+            margin-top: 20px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            padding-top: 15px;
+            border-top: 2px solid #f5f5f5;
+        }
+
+        .actions form {
+            flex: 1;
+            min-width: 80px;
+        }
+
+        button {
+            width: 100%;
+            padding: 10px 5px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 600;
+            transition: opacity 0.2s;
+        }
+
+        .btn-delete { background-color: #333; color: white; }
+        .btn-restrict { background-color: #ff9800; color: white; }
+        .btn-active { background-color: #4caf50; color: white; }
+
+        button:hover {
+            opacity: 0.85;
+        }
+
+        @media (max-width: 768px) {
+            .nav { width: 70px; }
+            .nav h1, .nav span { display: none; }
+            .main-content { margin-left: 70px; width: calc(100% - 70px); padding: 20px; }
+            .menu-grid { grid-template-columns: 1fr; }
+        }
+

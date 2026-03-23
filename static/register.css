@@ -1,0 +1,121 @@
+body {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background-color: #e4e2e2;
+  margin: 0;
+}
+
+.wrapper {
+  position: relative;
+  width: 300px;
+  background: rgb(25, 0, 255);
+  border-radius: 20px;
+  padding: 40px;
+  overflow: hidden;
+}
+
+.form-wrapper {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+}
+
+h2 {
+  font-size: 24px;
+  color: #fff;
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.input-group {
+  position: relative;
+  margin-bottom: 20px;
+}
+
+.input-group label {
+  position: absolute;
+  top: 50%;
+  left: 5px;
+  transform: translateY(-50%);
+  font-size: 16px;
+  color: #fff;
+  pointer-events: none;
+  transition: all 0.3s ease;
+}
+
+.input-group input {
+  width: calc(100% - 10px);
+  height: 40px;
+  font-size: 16px;
+  color: #fff;
+  padding: 0 10px;
+  background: transparent;
+  border: 2px solid #fff;
+  border-radius: 5px;
+  outline: none;
+}
+
+.input-group input:focus + label,
+.input-group input:not(:placeholder-shown) + label {
+  top: -10px;
+  left: 0;
+  font-size: 15px;
+}
+
+.remember {
+  margin-bottom: 15px;
+}
+
+.remember label {
+  color: #fff;
+  font-size: 16px;
+}
+
+.remember label a {
+  color: #04067e;
+}
+
+button {
+  width: 100%;
+  height: 40px;
+  background: #fff;
+  box-shadow: 0 0 10px rgb(9, 0, 92);
+  color: #000;
+  font-weight: 600;
+  border-radius: 30px;
+  border: none;
+  cursor: pointer;
+  outline: none;
+}
+
+button:hover {
+  background: #e0e0e0;
+}
+
+.signUp-link {
+  font-size: 14px;
+  text-align: center;
+  margin-top: 15px;
+}
+
+.signUp-link p {
+  color: #fff;
+}
+
+.signUp-link a {
+  color: #0ef;
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.signUp-link a:hover {
+  text-decoration: underline;
+}
+
+form {
+  padding-bottom: 50px;
+  padding-top: 30px;
+}
