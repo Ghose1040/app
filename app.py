@@ -36,7 +36,6 @@ class OnlineDelivery:
         
         
         def setup_routes(self):
-            
             @self.app.route("/")
             def home_public():
                     # Use SQLAlchemy session + text() for raw SQL
@@ -755,13 +754,9 @@ class OnlineDelivery:
             def admin_contact():
                 messages = self.db.session.execute(text("SELECT * FROM messages ORDER BY id DESC")).mappings().all()
                 return render_template('admin_contact.html', messages=messages)
-        
- # Create the instance of your class
-delivery_service = OnlineDelivery(__name__)
 
-# Gunicorn looks for this 'app' variable specifically
+delivery_service = OnlineDelivery(__name__)
 app = delivery_service.app
 
 if __name__ == "__main__":
-    # This part runs when you test locally
     app.run(debug=True)
