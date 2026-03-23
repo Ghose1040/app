@@ -20,16 +20,22 @@ class OnlineDelivery:
             # On Render, you should create an Environment Variable named DATABASE_URL
             # and paste your Aiven link: mysql://avnadmin:password@host:port/defaultdb
         uri = os.getenv("DATABASE_URL")
-    
+
         if uri:
-                # Fix the prefix for SQLAlchemy/PyMySQL
+            # 1. Standardize the prefix for PyMySQL
             if uri.startswith("mysql://"):
                 uri = uri.replace("mysql://", "mysql+pymysql://", 1)
+            
+            # 2. FIX: Remove invalid ssl-mode parameter if it exists
+            if "?ssl-mode=" in uri:
+                uri = uri.split("?ssl-mode=")[0]
+            elif "&ssl-mode=" in uri:
+                uri = uri.split("&ssl-mode=")[0]
+                
             self.app.config['SQLALCHEMY_DATABASE_URI'] = uri
         else:
-                # LOCAL PC SETTINGS (XAMPP)
+            # LOCAL PC SETTINGS (XAMPP)
             self.app.config['SQLALCHEMY_DATABASE_URI'] = "mysql+pymysql://root:@localhost/online_delivery"
-    
         self.app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
             
             # Initialize the database here so it's available to all routes
