@@ -6,6 +6,7 @@ import re
 import pymysql
 pymysql.install_as_MySQLdb()
 from flask_sqlalchemy import SQLAlchemy
+from flask_mysqldb import MySQL
 
 
 
@@ -15,11 +16,11 @@ class OnlineDelivery:
         self.app.secret_key = "hshshshshs"
 
         # Check if we are on Render (If DATABASE_URL exists)
-        if os.getenv("DATABASE_URL"):
+        if os.getenv("mysql://avnadmin:AVNS_gI-h-b14hOWxhamdNT_@mysql-13dadf74-franciselmido867-3a7e.i.aivencloud.com:28542/defaultdb?ssl-mode=REQUIRED"):
             self.app.config['MYSQL_HOST'] = "mysql-13dadf74-franciselmido867-3a7e.i.aivencloud.com"
             self.app.config['MYSQL_USER'] = "avnadmin"
             # We tell Flask to look for the password on Render, not here!
-            self.app.config['MYSQL_PASSWORD'] = os.getenv("DB_PASSWORD")
+            self.app.config['MYSQL_PASSWORD'] = os.getenv("AVNS_gI-h-b14hOWxhamdNT_")
             self.app.config['MYSQL_PORT'] = 28542
             self.app.config['MYSQL_DB'] = "defaultdb"
         else:
@@ -52,66 +53,69 @@ class OnlineDelivery:
         self.db = SQLAlchemy(self.app)
 
 #public  
+        # --- PUBLIC ROUTES ---
+        
         @self.app.route("/")
         def home_public():
-            cursor = self.mysql.connection.cursor()
-            cursor.execute("SELECT * FROM menu")
-            menus = cursor.fetchall()
+            # Use SQLAlchemy session + text() for raw SQL
+            result = self.db.session.execute(text("SELECT * FROM menu"))
+            menus = result.mappings().all()
             return render_template("home_public.html", menu_list=menus)
-        
-        
+
         @self.app.route("/bestsellers_public")
         def bestseller_public(): 
-            cursor = self.mysql.connection.cursor()
-            cursor.execute("SELECT * FROM menu WHERE category2 = 'Best Sellers'")
-            menus = cursor.fetchall()
+            result = self.db.session.execute(
+                text("SELECT * FROM menu WHERE category2 = :cat"), {"cat": 'Best Sellers'}
+            )
+            menus = result.mappings().all()
             return render_template("bestsellers_public.html", menu_list=menus)
-        
-        
+
         @self.app.route("/newproducts_public")
         def newproducts_public(): 
-            cursor = self.mysql.connection.cursor()
-            cursor.execute("SELECT * FROM menu WHERE category2 = 'New Products'")
-            menus = cursor.fetchall()
+            result = self.db.session.execute(
+                text("SELECT * FROM menu WHERE category2 = :cat"), {"cat": 'New Products'}
+            )
+            menus = result.mappings().all()
             return render_template("newproducts_public.html", menu_list=menus)
-        
+
         @self.app.route("/burger_public")
         def burger_public(): 
-            cursor = self.mysql.connection.cursor()
-            cursor.execute("SELECT * FROM menu WHERE category = 'Burgers'")
-            menus = cursor.fetchall()
+            result = self.db.session.execute(
+                text("SELECT * FROM menu WHERE category = :cat"), {"cat": 'Burgers'}
+            )
+            menus = result.mappings().all()
             return render_template("burger_public.html", menu_list=menus)
-        
+
         @self.app.route("/filipinofoods_public")
         def filipinofoods_public(): 
-            cursor = self.mysql.connection.cursor()
-            cursor.execute("SELECT * FROM menu WHERE category2 = 'Filipino Foods'")
-            menus = cursor.fetchall()
+            result = self.db.session.execute(
+                text("SELECT * FROM menu WHERE category2 = :cat"), {"cat": 'Filipino Foods'}
+            )
+            menus = result.mappings().all()
             return render_template("filipinofoods_public.html", menu_list=menus)
-        
-        
-        
+
         @self.app.route("/meal_public")
         def meal_public(): 
-            cursor = self.mysql.connection.cursor()
-            cursor.execute("SELECT * FROM menu WHERE category = 'Meal'")
-            menus = cursor.fetchall()
+            result = self.db.session.execute(
+                text("SELECT * FROM menu WHERE category = :cat"), {"cat": 'Meal'}
+            )
+            menus = result.mappings().all()
             return render_template("meal_public.html", menu_list=menus)
-        
-        
-        
+
         @self.app.route("/snack_public")
         def snack_public(): 
-            cursor = self.mysql.connection.cursor()
-            cursor.execute("SELECT * FROM menu WHERE category = 'Snacks'")
-            menus = cursor.fetchall()
+            result = self.db.session.execute(
+                text("SELECT * FROM menu WHERE category = :cat"), {"cat": 'Snacks'}
+            )
+            menus = result.mappings().all()
             return render_template("snack_public.html", menu_list=menus)
-        
+
         @self.app.route("/drinks_public")
         def drinks_public(): 
-            cursor = self.mysql.connection.cursor()
-            cursor.execute("SELECT * FROM menu WHERE category = 'Drinks N Desserts'")
-            menus = cursor.fetchall()
+            result = self.db.session.execute(
+                text("SELECT * FROM menu WHERE category = :cat"), {"cat": 'Drinks N Desserts'}
+            )
+            menus = result.mappings().all()
             return render_template("drinks_public.html", menu_list=menus)
         
         
@@ -154,6 +158,8 @@ class OnlineDelivery:
 
         # --- MIDDLEWARE / AUTH WRAPPERS ---
 
+        # --- MIDDLEWARE / AUTH WRAPPERS ---
+
         def is_admin():
             return session.get('role') == 'admin'
 
@@ -164,10 +170,9 @@ class OnlineDelivery:
         def login():
             return render_template("login.html")
         
-        
         @self.app.route("/login_process", methods=["POST", "GET"])
         def login_process():
-            # Static admin check as requested
+            # Static admin check
             if request.form.get("username") == "admin" and request.form.get("password") == "francis":
                 session["role"] = "admin"
                 session["user"] = "admin"
@@ -177,10 +182,10 @@ class OnlineDelivery:
                 user_textbox = request.form["username"]
                 pass_textbox = request.form["password"]
 
-                cursor = self.mysql.connection.cursor()
-                # Check for user by username
-                cursor.execute("SELECT id, Password, status FROM register WHERE Username=%s", (user_textbox,))
-                account_found = cursor.fetchone()
+                # Use SQLAlchemy session
+                query = text("SELECT id, Password, status FROM register WHERE Username = :u")
+                result = self.db.session.execute(query, {"u": user_textbox})
+                account_found = result.fetchone()
                 
                 if account_found:
                     user_id = account_found[0]
@@ -202,8 +207,7 @@ class OnlineDelivery:
                 else:
                     flash("Incorrect Username or Password.")
                     return redirect("/login")
-            else:
-                return render_template("login.html")
+            return render_template("login.html")
 
         @self.app.route("/register", methods=["GET", "POST"])
         def register():
@@ -216,972 +220,572 @@ class OnlineDelivery:
                 std_username = request.form["username"]
                 std_password = request.form["password"]
                 
-                # Hash the password before storing it
+                # Hash the password
                 hashed_password = bcrypt.hashpw(std_password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
                     
-                cursor = self.mysql.connection.cursor()
-                cursor.execute("INSERT INTO register (First_name, Last_name, Age, Address, Contact, Username, Password) VALUES (%s, %s, %s, %s, %s, %s, %s)", 
-                               (std_first, std_last, std_age, std_address, std_contact, std_username, hashed_password))
-                self.mysql.connection.commit()
-                cursor.close()
+                # Use SQLAlchemy to INSERT
+                query = text("""
+                    INSERT INTO register (First_name, Last_name, Age, Address, Contact, Username, Password) 
+                    VALUES (:f, :l, :a, :addr, :c, :u, :p)
+                """)
+                
+                self.db.session.execute(query, {
+                    "f": std_first, "l": std_last, "a": std_age, 
+                    "addr": std_address, "c": std_contact, 
+                    "u": std_username, "p": hashed_password
+                })
+                
+                self.db.session.commit() # Crucial for saving to Aiven
                     
                 return redirect(url_for('login'))
-            else:
-                return render_template("register.html")
+            return render_template("register.html")
 
 ######################
 #Menus
+
+        # --- LOGGED-IN USER ROUTES ---
 
         @self.app.route("/home")
         def home():
             if "user" in session:
                 user_id = session["user"]
-                cursor = self.mysql.connection.cursor()
-                cursor.execute("SELECT * FROM menu")
-                menus = cursor.fetchall()
                 
-                cursor.execute("SELECT COUNT(*) FROM cart WHERE user_id = %s", (user_id,))
-                cart_count = cursor.fetchone()[0]
+                # Fetch Menu
+                menus = self.db.session.execute(text("SELECT * FROM menu")).mappings().all()
+                
+                # Fetch Cart Count
+                cart_res = self.db.session.execute(
+                    text("SELECT COUNT(*) FROM cart WHERE user_id = :u"), {"u": user_id}
+                ).fetchone()
+                cart_count = cart_res[0] if cart_res else 0
                 
                 return render_template("home.html", menu_list=menus, cart_count=cart_count)
-            else:
-                return redirect("/login")
-            
-            
+            return redirect("/login")
+
         @self.app.route("/search", methods=["GET", "POST"])
         def search():
             if "user" in session:
-                search = request.form.get("search")
+                search_term = request.form.get("search", "")
                 user_id = session["user"]
-                cursor = self.mysql.connection.cursor()
-                cursor.execute("SELECT * FROM menu WHERE name LIKE %s", (search,))
-                menus = cursor.fetchall()
                 
-                cursor.execute("SELECT COUNT(*) FROM cart WHERE user_id = %s", (user_id,))
-                cart_count = cursor.fetchone()[0]
+                # Fetch Menu with LIKE (adding wildcards for better searching)
+                menus = self.db.session.execute(
+                    text("SELECT * FROM menu WHERE name LIKE :s"), 
+                    {"s": f"%{search_term}%"}
+                ).mappings().all()
                 
-                cursor.execute("SELECT First_name, Last_name, Address, Contact FROM register WHERE ID=%s", (user_id,))
-                user_info = cursor.fetchone()
+                # Fetch Cart Count
+                cart_res = self.db.session.execute(
+                    text("SELECT COUNT(*) FROM cart WHERE user_id = :u"), {"u": user_id}
+                ).fetchone()
+                cart_count = cart_res[0] if cart_res else 0
                 
+                # Fetch User Info
+                user_info = self.db.session.execute(
+                    text("SELECT First_name, Last_name, Address, Contact FROM register WHERE ID = :u"), 
+                    {"u": user_id}
+                ).fetchone()
                 
-                return render_template("search.html", menu_list=menus, search=search, cart_count=cart_count, user_info=user_info)
-            else:
-                return redirect("/login")
+                return render_template("search.html", menu_list=menus, search=search_term, cart_count=cart_count, user_info=user_info)
+            return redirect("/login")
+
+        # --- CATEGORY ROUTES (Logged In) ---
+
+        def get_category_data(self, category_col, category_val, user_id):
+            """Helper function to reduce repeated code"""
+            menus = self.db.session.execute(
+                text(f"SELECT * FROM menu WHERE {category_col} = :val"), {"val": category_val}
+            ).mappings().all()
             
+            cart_res = self.db.session.execute(
+                text("SELECT COUNT(*) FROM cart WHERE user_id = :u"), {"u": user_id}
+            ).fetchone()
+            
+            user_info = self.db.session.execute(
+                text("SELECT First_name, Last_name, Address, Contact FROM register WHERE ID = :u"), 
+                {"u": user_id}
+            ).fetchone()
+            
+            return menus, (cart_res[0] if cart_res else 0), user_info
 
         @self.app.route("/bestsellers")
         def bestsellers(): 
             if "user" in session:
-                user_id = session["user"]
-                cursor = self.mysql.connection.cursor()
-                cursor.execute("SELECT * FROM menu WHERE category2 = 'Best Sellers'")
-                menus = cursor.fetchall()
-                
-                cursor.execute("SELECT COUNT(*) FROM cart WHERE user_id = %s", (user_id,))
-                cart_count = cursor.fetchone()[0]
-                cursor.execute("SELECT First_name, Last_name, Address, Contact FROM register WHERE ID=%s", (user_id,))
-                user_info = cursor.fetchone()
-                
-                return render_template("bestsellers.html", menu_list=menus, cart_count=cart_count, user_info=user_info)
-                
-            else:
-                return redirect('/login')
-            
-            
+                menus, count, info = self.get_category_data("category2", "Best Sellers", session["user"])
+                return render_template("bestsellers.html", menu_list=menus, cart_count=count, user_info=info)
+            return redirect('/login')
+
         @self.app.route("/newproducts")
         def newproducts(): 
             if "user" in session:
-                user_id = session["user"]
-                cursor = self.mysql.connection.cursor()
-                cursor.execute("SELECT * FROM menu WHERE category2 = 'New Products'")
-                menus = cursor.fetchall()
-                
-                cursor.execute("SELECT COUNT(*) FROM cart WHERE user_id = %s", (user_id,))
-                cart_count = cursor.fetchone()[0]
-                cursor.execute("SELECT First_name, Last_name, Address, Contact FROM register WHERE ID=%s", (user_id,))
-                user_info = cursor.fetchone()
-                
-                return render_template("newproducts.html", menu_list=menus, cart_count=cart_count, user_info=user_info)
-                
-            else:
-                return redirect('/login')
-            
-
+                menus, count, info = self.get_category_data("category2", "New Products", session["user"])
+                return render_template("newproducts.html", menu_list=menus, cart_count=count, user_info=info)
+            return redirect('/login')
 
         @self.app.route("/burger")
         def burger(): 
             if "user" in session:
-                user_id = session["user"]
-                cursor = self.mysql.connection.cursor()
-                cursor.execute("SELECT * FROM menu WHERE category = 'Burgers'")
-                menus = cursor.fetchall()
-                
-                cursor.execute("SELECT COUNT(*) FROM cart WHERE user_id = %s", (user_id,))
-                cart_count = cursor.fetchone()[0]
-                
-                cursor.execute("SELECT First_name, Last_name, Address, Contact FROM register WHERE ID=%s", (user_id,))
-                user_info = cursor.fetchone()
-                
-                return render_template("burger.html", menu_list=menus, cart_count=cart_count, user_info=user_info)
-            else:
-                return redirect('/login')
-            
-        
+                menus, count, info = self.get_category_data("category", "Burgers", session["user"])
+                return render_template("burger.html", menu_list=menus, cart_count=count, user_info=info)
+            return redirect('/login')
+
         @self.app.route("/filipinofoods")
         def filipinofoods(): 
             if "user" in session:
-                user_id = session["user"]
-                cursor = self.mysql.connection.cursor()
-                cursor.execute("SELECT * FROM menu WHERE category2 = 'Filipino Foods'")
-                menus = cursor.fetchall()
-                
-                cursor.execute("SELECT COUNT(*) FROM cart WHERE user_id = %s", (user_id,))
-                cart_count = cursor.fetchone()[0]
-                
-                cursor.execute("SELECT First_name, Last_name, Address, Contact FROM register WHERE ID=%s", (user_id,))
-                user_info = cursor.fetchone()
-                
-                return render_template("filipinofoods.html", menu_list=menus, cart_count=cart_count, user_info=user_info)
-            else:
-                return redirect('/login')
-            
+                menus, count, info = self.get_category_data("category2", "Filipino Foods", session["user"])
+                return render_template("filipinofoods.html", menu_list=menus, cart_count=count, user_info=info)
+            return redirect('/login')
 
         @self.app.route("/meal")
         def meal(): 
             if "user" in session:
-                user_id = session["user"]
-                cursor = self.mysql.connection.cursor()
-                cursor.execute("SELECT * FROM menu WHERE category = 'Meal'")
-                menus = cursor.fetchall()
-                
-                cursor.execute("SELECT COUNT(*) FROM cart WHERE user_id = %s", (user_id,))
-                cart_count = cursor.fetchone()[0]
-                
-                cursor.execute("SELECT First_name, Last_name, Address, Contact FROM register WHERE ID=%s", (user_id,))
-                user_info = cursor.fetchone()
-                
-                return render_template("meal.html", menu_list=menus, cart_count=cart_count, user_info=user_info)
-            else:
-                return redirect('/login')
-            
+                menus, count, info = self.get_category_data("category", "Meal", session["user"])
+                return render_template("meal.html", menu_list=menus, cart_count=count, user_info=info)
+            return redirect('/login')
 
         @self.app.route("/snack")
         def snack():
             if "user" in session:
-                user_id = session["user"]
-                cursor = self.mysql.connection.cursor()
-                cursor.execute("SELECT * FROM menu WHERE category = 'Snacks'")
-                menus = cursor.fetchall()
-                
-                cursor.execute("SELECT COUNT(*) FROM cart WHERE user_id = %s", (user_id,))
-                cart_count = cursor.fetchone()[0]
-                
-                cursor.execute("SELECT First_name, Last_name, Address, Contact FROM register WHERE ID=%s", (user_id,))
-                user_info = cursor.fetchone()
-                
-                return render_template("snack.html", menu_list=menus, cart_count=cart_count, user_info=user_info)
-            else:
-                return redirect('/login')
-            
+                menus, count, info = self.get_category_data("category", "Snacks", session["user"])
+                return render_template("snack.html", menu_list=menus, cart_count=count, user_info=info)
+            return redirect('/login')
 
         @self.app.route("/drinks")
         def drinks(): 
             if "user" in session:
-                user_id = session["user"]
-                cursor = self.mysql.connection.cursor()
-                cursor.execute("SELECT * FROM menu WHERE category = 'Drinks N Desserts'")
-                menus = cursor.fetchall()
-                cursor.execute("SELECT COUNT(*) FROM cart WHERE user_id = %s", (user_id,))
-                cart_count = cursor.fetchone()[0]
-                
-                cursor.execute("SELECT First_name, Last_name, Address, Contact FROM register WHERE ID=%s", (user_id,))
-                user_info = cursor.fetchone()
-                
-                return render_template("drinks.html", menu_list=menus, cart_count=cart_count, user_info=user_info)
-            else:
-                return redirect("/login")
+                menus, count, info = self.get_category_data("category", "Drinks N Desserts", session["user"])
+                return render_template("drinks.html", menu_list=menus, cart_count=count, user_info=info)
+            return redirect("/login")
             
         
         
-#########################
-#Add to cart process           
+# --- HELPER: Unified Add to Cart Logic ---
+        def handle_add_to_cart(self, redirect_to):
+            if "user" not in session:
+                return redirect("/login")
+            
+            item_name = request.form['item_name']
+            item_price = float(request.form['item_price'])
+            item_img = request.form['item_img'] 
+            quantity = int(request.form['quantity'])
+            user_id = session["user"]
+            total_price = item_price * quantity
 
+            # Check if item exists in user's cart
+            query_check = text("SELECT quantity FROM cart WHERE item_name = :n AND user_id = :u")
+            existing = self.db.session.execute(query_check, {"n": item_name, "u": user_id}).fetchone()
+
+            if existing:
+                new_qty = existing[0] + quantity
+                new_total = new_qty * item_price
+                self.db.session.execute(
+                    text("UPDATE cart SET quantity = :q, total_price = :t WHERE item_name = :n AND user_id = :u"),
+                    {"q": new_qty, "t": new_total, "n": item_name, "u": user_id}
+                )
+            else:
+                self.db.session.execute(
+                    text("""INSERT INTO cart (item_name, quantity, item_price, item_img, total_price, user_id) 
+                            VALUES (:n, :q, :p, :i, :t, :u)"""),
+                    {"n": item_name, "q": quantity, "p": item_price, "i": item_img, "t": total_price, "u": user_id}
+                )
+            
+            self.db.session.commit()
+            return redirect(url_for(redirect_to))
+
+        # --- REPLACED: Category-Specific Add to Cart Routes ---
         @self.app.route("/add_to_cart_search", methods=["POST"])
-        def add_to_cart_search():
-            if "user" in session:
-                item_name = request.form['item_name']
-                item_price = request.form['item_price']
-                item_img = request.form['item_img'] 
-                quantity = request.form['quantity']
+        def add_to_cart_search(): return self.handle_add_to_cart('search')
 
-                total_price = float(item_price) * int(quantity)
-
-
-                cursor = self.mysql.connection.cursor()
-                user_id = session["user"]
-                cursor.execute("INSERT INTO cart (item_name, quantity, item_price, item_img, total_price, user_id) VALUES (%s, %s, %s, %s, %s, %s)", (item_name, quantity, item_price, item_img, total_price, user_id))
-                self.mysql.connection.commit()
-
-                return redirect(url_for('search'))
-            else:
-                return redirect("/login")
-
-    
         @self.app.route("/add_to_cart", methods=["POST"])
-        def add_to_cart():
-            if "user" in session:
-                item_name = request.form['item_name']
-                item_price = request.form['item_price']
-                item_img = request.form['item_img'] 
-                quantity = request.form['quantity']
+        def add_to_cart(): return self.handle_add_to_cart('home')
 
-                total_price = float(item_price) * int(quantity)
+        @self.app.route("/add_to_cart_bestsellers", methods=["POST"])
+        def add_to_cart_bestsellers(): return self.handle_add_to_cart('bestsellers')
 
+        @self.app.route("/add_to_cart_newproducts", methods=["POST"])
+        def add_to_cart_newproducts(): return self.handle_add_to_cart('newproducts')
 
-                cursor = self.mysql.connection.cursor()
-                user_id = session["user"]
-                cursor.execute("INSERT INTO cart (item_name, quantity, item_price, item_img, total_price, user_id) VALUES (%s, %s, %s, %s, %s, %s)", (item_name, quantity, item_price, item_img, total_price, user_id))
-                self.mysql.connection.commit()
+        @self.app.route("/add_to_cart_burger", methods=["POST"])
+        def add_to_cart_burger(): return self.handle_add_to_cart('burger')
 
-                return redirect(url_for('home'))
-            else:
-                return redirect("/login")
-            
+        @self.app.route("/add_to_cart_filipinofoods", methods=["POST"])
+        def add_to_cart_filipinofoods(): return self.handle_add_to_cart('filipinofoods')
+
+        # --- ORDERING SYSTEM ---
+
         @self.app.route("/place_the_order", methods=["GET", "POST"])
         def place_the_order():
             if request.method == "POST":
-                item_name = request.form['item_name']
-                item_price = request.form['item_price']
-                item_img = request.form['item_img'] 
-                quantity = request.form['quantity']
-                name = request.form['name']
-                address = request.form['address']
-                number = request.form['number']
-                
-                total_price = float(item_price) * int(quantity)
-                cursor = self.mysql.connection.cursor()
-                user_id = session["user"]
-                cursor.execute("SELECT First_name, Last_name, Address, Contact FROM register WHERE ID=%s", (user_id,))
-                user_info = cursor.fetchone()
+                user_id = session.get("user")
+                # Fetch User Info for the confirmation page
+                user_info = self.db.session.execute(
+                    text("SELECT First_name, Last_name, Address, Contact FROM register WHERE ID=:u"), 
+                    {"u": user_id}
+                ).fetchone()
                 
                 return render_template(
                     "place_the_order.html", 
-                    item_name=item_name, 
-                    item_price=item_price, 
-                    item_img=item_img, 
-                    quantity=quantity, total_price=total_price,
-                    name=name, address=address, number=number, user_info=user_info
+                    item_name=request.form['item_name'], 
+                    item_price=request.form['item_price'], 
+                    item_img=request.form['item_img'], 
+                    quantity=request.form['quantity'], 
+                    total_price=float(request.form['item_price']) * int(request.form['quantity']),
+                    name=request.form['name'], 
+                    address=request.form['address'], 
+                    number=request.form['number'], 
+                    user_info=user_info
                 )
             return render_template("cart.html")
             
         @self.app.route("/place_order", methods=["POST"])
         def place_order():
             if "user" in session:
+                user_id = session["user"]
+                item_price = float(request.form['item_price'])
+                quantity = int(request.form['quantity'])
                 
-                if request.method == "POST":
-                    item_name = request.form['item_name']
-                    item_price = request.form['item_price']
-                    item_img = request.form['item_img'] 
-                    quantity = request.form['quantity']
-                    name = request.form['name']
-                    address = request.form['address']
-                    number = request.form['number']
-                    payment_method = request.form['payment_method']
-                    total_price = float(item_price) * int(quantity)
-
-
-                    cursor = self.mysql.connection.cursor()
-                    user_id = session["user"]
-                    cursor.execute("INSERT INTO orders (item_name, item_price, item_img, quantity, name, address, number, payment_method, total, user_id) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)", 
-                                   (item_name, item_price, item_img, quantity, name, address, number, payment_method, total_price, user_id))
-                    self.mysql.connection.commit()
-                    
-
+                query = text("""
+                    INSERT INTO orders (item_name, item_price, item_img, quantity, name, address, number, payment_method, total, user_id) 
+                    VALUES (:item, :price, :img, :qty, :name, :addr, :num, :pay, :total, :u)
+                """)
+                
+                self.db.session.execute(query, {
+                    "item": request.form['item_name'], "price": item_price, "img": request.form['item_img'],
+                    "qty": quantity, "name": request.form['name'], "addr": request.form['address'],
+                    "num": request.form['number'], "pay": request.form['payment_method'],
+                    "total": item_price * quantity, "u": user_id
+                })
+                self.db.session.commit()
                 return redirect(url_for('home'))
-            else:
-                return redirect("/login")
-
-            
-
-        @self.app.route("/add_to_cart_bestsellers", methods=["POST"])
-        def add_to_cart_bestsellers():
-            item_names = request.form['item_name']
-            item_price = request.form['item_price']
-            item_img = request.form['item_img']
-            quantity = request.form['quantity']
-
-            total_price = float(item_price) * int(quantity)
-
-            cursor = self.mysql.connection.cursor()
-            user_id = session["user"]
-
-            cursor.execute("SELECT quantity, total_price FROM cart WHERE item_name = %s AND user_id = %s", (item_names, user_id))
-            existing_item = cursor.fetchone()
-
-            if existing_item:
-      
-                new_quantity = existing_item[0] + int(quantity)
-                new_total_price = new_quantity * float(item_price)
-                cursor.execute("UPDATE cart SET quantity = %s, total_price = %s WHERE item_name = %s AND user_id = %s", 
-                       (new_quantity, new_total_price, item_names, user_id))
-            else:
-      
-                cursor.execute("INSERT INTO cart (item_name, quantity, item_price, item_img, total_price, user_id) VALUES (%s, %s, %s, %s, %s, %s)", 
-                   (item_names, quantity, item_price, item_img, total_price, user_id))
-
-            self.mysql.connection.commit()
-
-            return redirect(url_for('bestsellers'))
-        
-
-        @self.app.route("/add_to_cart_newproducts", methods=["POST"])
-        def add_to_cart_newproducts():
-            item_name = request.form['item_name']
-            item_price = request.form['item_price']
-            item_img = request.form['item_img']
-            quantity = request.form['quantity']
-
-            total_price = float(item_price) * int(quantity)
-
-            cursor = self.mysql.connection.cursor()
-            user_id = session["user"]
-
-            cursor.execute("SELECT quantity, total_price FROM cart WHERE item_name = %s AND user_id = %s", (item_name, user_id))
-            existing_item = cursor.fetchone()
-
-            if existing_item:
-      
-                new_quantity = existing_item[0] + int(quantity)
-                new_total_price = new_quantity * float(item_price)
-                cursor.execute("UPDATE cart SET quantity = %s, total_price = %s WHERE item_name = %s AND user_id = %s", 
-                       (new_quantity, new_total_price, item_name, user_id))
-            else:
-      
-                cursor.execute("INSERT INTO cart (item_name, quantity, item_price, item_img, total_price, user_id) VALUES (%s, %s, %s, %s, %s, %s)", 
-                   (item_name, quantity, item_price, item_img, total_price, user_id))
-
-            self.mysql.connection.commit()
-
-            return redirect(url_for('newproducts'))
+            return redirect("/login")
         
 
 
-        @self.app.route("/add_to_cart_burger", methods=["POST"])
-        def add_to_cart_burger():
-            item_name = request.form['item_name']
-            item_price = request.form['item_price']
-            item_img = request.form['item_img']
-            quantity = request.form['quantity']
-
-            total_price = float(item_price) * int(quantity)
-
-            cursor = self.mysql.connection.cursor()
-            user_id = session["user"]
-
-            cursor.execute("SELECT quantity, total_price FROM cart WHERE item_name = %s AND user_id = %s", (item_name, user_id))
-            existing_item = cursor.fetchone()
-
-            if existing_item:
-      
-                new_quantity = existing_item[0] + int(quantity)
-                new_total_price = new_quantity * float(item_price)
-                cursor.execute("UPDATE cart SET quantity = %s, total_price = %s WHERE item_name = %s AND user_id = %s", 
-                       (new_quantity, new_total_price, item_name, user_id))
-            else:
-      
-                cursor.execute("INSERT INTO cart (item_name, quantity, item_price, item_img, total_price, user_id) VALUES (%s, %s, %s, %s, %s, %s)", 
-                   (item_name, quantity, item_price, item_img, total_price, user_id))
-
-            self.mysql.connection.commit()
-
-            return redirect(url_for('burger'))
-
-        
-
-        @self.app.route("/add_to_cart_filipinofoods", methods=["POST"])
-        def add_to_cart_filipinofoods():
-            item_name = request.form['item_name']
-            item_price = request.form['item_price']
-            item_img = request.form['item_img']
-            quantity = request.form['quantity']
-
-            total_price = float(item_price) * int(quantity)
-
-            cursor = self.mysql.connection.cursor()
-            user_id = session["user"]
-
-            cursor.execute("SELECT quantity, total_price FROM cart WHERE item_name = %s AND user_id = %s", (item_name, user_id))
-            existing_item = cursor.fetchone()
-
-            if existing_item:
-      
-                new_quantity = existing_item[0] + int(quantity)
-                new_total_price = new_quantity * float(item_price)
-                cursor.execute("UPDATE cart SET quantity = %s, total_price = %s WHERE item_name = %s AND user_id = %s", 
-                       (new_quantity, new_total_price, item_name, user_id))
-            else:
-      
-                cursor.execute("INSERT INTO cart (item_name, quantity, item_price, item_img, total_price, user_id) VALUES (%s, %s, %s, %s, %s, %s)", 
-                   (item_name, quantity, item_price, item_img, total_price, user_id))
-
-            self.mysql.connection.commit()
-
-            return redirect(url_for('filipinofoods'))
-        
-
+        # These routes now use the helper function we created earlier
+        # which handles both NEW items and UPDATING existing quantities.
 
         @self.app.route("/add_to_cart_snack", methods=["POST"])
         def add_to_cart_snack():
-            item_name = request.form['item_name']
-            item_price = request.form['item_price']
-            item_img = request.form['item_img']
-            quantity = request.form['quantity']
-
-            total_price = float(item_price) * int(quantity)
-
-            cursor = self.mysql.connection.cursor()
-            user_id = session["user"]
-
-            cursor.execute("SELECT quantity, total_price FROM cart WHERE item_name = %s AND user_id = %s", (item_name, user_id))
-            existing_item = cursor.fetchone()
-
-            if existing_item:
-      
-                new_quantity = existing_item[0] + int(quantity)
-                new_total_price = new_quantity * float(item_price)
-                cursor.execute("UPDATE cart SET quantity = %s, total_price = %s WHERE item_name = %s AND user_id = %s", 
-                       (new_quantity, new_total_price, item_name, user_id))
-            else:
-      
-                cursor.execute("INSERT INTO cart (item_name, quantity, item_price, item_img, total_price, user_id) VALUES (%s, %s, %s, %s, %s, %s)", 
-                   (item_name, quantity, item_price, item_img, total_price, user_id))
-
-            self.mysql.connection.commit()
-
-            return redirect(url_for('snack'))
-        
-
+            return self.handle_add_to_cart('snack')
 
         @self.app.route("/add_to_cart_drinks", methods=["POST"])
         def add_to_cart_drinks():
-            item_name = request.form['item_name']
-            item_price = request.form['item_price']
-            item_img = request.form['item_img']
-            quantity = request.form['quantity']
+            return self.handle_add_to_cart('drinks')
 
-            total_price = float(item_price) * int(quantity)
-
-            cursor = self.mysql.connection.cursor()
-            user_id = session["user"]
-
-            cursor.execute("SELECT quantity, total_price FROM cart WHERE item_name = %s AND user_id = %s", (item_name, user_id))
-            existing_item = cursor.fetchone()
-
-            if existing_item:
-      
-                new_quantity = existing_item[0] + int(quantity)
-                new_total_price = new_quantity * float(item_price)
-                cursor.execute("UPDATE cart SET quantity = %s, total_price = %s WHERE item_name = %s AND user_id = %s", 
-                       (new_quantity, new_total_price, item_name, user_id))
-            else:
-      
-                cursor.execute("INSERT INTO cart (item_name, quantity, item_price, item_img, total_price, user_id) VALUES (%s, %s, %s, %s, %s, %s)", 
-                   (item_name, quantity, item_price, item_img, total_price, user_id))
-
-            self.mysql.connection.commit()
-
-            return redirect(url_for('drinks'))
-        
         @self.app.route("/add_to_cart_meal", methods=["POST"])
         def add_to_cart_meal():
-            item_name = request.form['item_name']
-            item_price = request.form['item_price']
-            item_img = request.form['item_img']
-            quantity = request.form['quantity']
-
-            total_price = float(item_price) * int(quantity)
-
-            cursor = self.mysql.connection.cursor()
-            user_id = session["user"]
-
-            cursor.execute("SELECT quantity, total_price FROM cart WHERE item_name = %s AND user_id = %s", (item_name, user_id))
-            existing_item = cursor.fetchone()
-
-            if existing_item:
-      
-                new_quantity = existing_item[0] + int(quantity)
-                new_total_price = new_quantity * float(item_price)
-                cursor.execute("UPDATE cart SET quantity = %s, total_price = %s WHERE item_name = %s AND user_id = %s", 
-                       (new_quantity, new_total_price, item_name, user_id))
-            else:
-      
-                cursor.execute("INSERT INTO cart (item_name, quantity, item_price, item_img, total_price, user_id) VALUES (%s, %s, %s, %s, %s, %s)", 
-                   (item_name, quantity, item_price, item_img, total_price, user_id))
-
-            self.mysql.connection.commit()
-
-            return redirect(url_for('meal'))
-        
-
-
+            return self.handle_add_to_cart('meal')
 
         @self.app.route("/add_to_cart_dessert", methods=["POST"])
         def add_to_cart_dessert():
-            item_name = request.form['item_name']
-            item_price = request.form['item_price']
-            item_img = request.form['item_img']
-            quantity = request.form['quantity']
-
-            total_price = float(item_price) * int(quantity)
-
-            cursor = self.mysql.connection.cursor()
-            user_id = session["user"]
-
-            cursor.execute("SELECT quantity, total_price FROM cart WHERE item_name = %s AND user_id = %s", (item_name, user_id))
-            existing_item = cursor.fetchone()
-
-            if existing_item:
-      
-                new_quantity = existing_item[0] + int(quantity)
-                new_total_price = new_quantity * float(item_price)
-                cursor.execute("UPDATE cart SET quantity = %s, total_price = %s WHERE item_name = %s AND user_id = %s", 
-                       (new_quantity, new_total_price, item_name, user_id))
-            else:
-      
-                cursor.execute("INSERT INTO cart (item_name, quantity, item_price, item_img, total_price, user_id) VALUES (%s, %s, %s, %s, %s, %s)", 
-                   (item_name, quantity, item_price, item_img, total_price, user_id))
-
-            self.mysql.connection.commit()
-
-            return redirect(url_for('dessert'))
+            # Ensure you have a 'dessert' route defined in your setup_routes
+            return self.handle_add_to_cart('dessert')
 
 
-########################
-
-        @self.app.route("/cart")
+@self.app.route("/cart")
         def cart():
             if "user" in session:
                 user_id = session["user"]
-                cursor = self.mysql.connection.cursor()
-
-                cursor.execute("SELECT * FROM cart WHERE user_id=%s", (user_id,))
-                cart_items = cursor.fetchall()
-
-                total_price = sum(item[3] * item[2] for item in cart_items)
                 
-                cursor.execute("SELECT First_name, Last_name, Address, Contact FROM register WHERE ID=%s", (user_id,))
-                user_info = cursor.fetchone()
+                # Fetch cart items as dictionaries for easier access
+                cart_items = self.db.session.execute(
+                    text("SELECT * FROM cart WHERE user_id=:u"), {"u": user_id}
+                ).mappings().all()
+
+                # Calculate total using key names
+                total_price = sum(item['item_price'] * item['quantity'] for item in cart_items)
+                
+                user_info = self.db.session.execute(
+                    text("SELECT First_name, Last_name, Address, Contact FROM register WHERE ID=:u"), 
+                    {"u": user_id}
+                ).fetchone()
 
                 return render_template("cart.html", cart_items=cart_items, total_price=total_price, user_info=user_info)
-            else:
-                return redirect("/login")
+            return redirect("/login")
             
         @self.app.route("/confirmation", methods=["POST"])
         def confirmation():
             if "user" in session:
                 user_id = session["user"]
                 selected_items = request.form.getlist("selected_items")
-
-                cursor = self.mysql.connection.cursor()
                 
                 items_for_order = []
                 total_order_price = 0
 
                 for item_id in selected_items:
-                    cursor.execute("SELECT item_name, quantity, item_price, item_img FROM cart WHERE id=%s AND user_id=%s", (item_id, user_id))
-                    item = cursor.fetchone()
+                    item = self.db.session.execute(
+                        text("SELECT item_name, quantity, item_price, item_img FROM cart WHERE id=:id AND user_id=:u"),
+                        {"id": item_id, "u": user_id}
+                    ).fetchone()
+
                     if item:
-                        item_name, quantity, item_price, item_img = item
-                        total_price = item_price * quantity
-                        total_order_price += total_price
+                        name, qty, price, img = item
+                        subtotal = price * qty
+                        total_order_price += subtotal
                         items_for_order.append({
-                            "item_id": item_id,
-                            "item_name": item_name,
-                            "quantity": quantity,
-                            "item_price": item_price,
-                            "total_price": total_price,
-                            "item_img": item_img
+                            "item_id": item_id, "item_name": name, "quantity": qty,
+                            "item_price": price, "total_price": subtotal, "item_img": img
                         })
 
-                cursor.execute("SELECT First_name, Last_name, Address, Contact FROM register WHERE ID=%s", (user_id,))
-                user_info = cursor.fetchone()
+                user_info = self.db.session.execute(
+                    text("SELECT First_name, Last_name, Address, Contact FROM register WHERE ID=:u"), 
+                    {"u": user_id}
+                ).fetchone()
 
                 return render_template("confirmation.html", items_for_order=items_for_order, total_order_price=total_order_price, user_info=user_info)
-        
+            return redirect("/login")
         
         @self.app.route("/confirm_order", methods=["POST"])
         def confirm_order():
             if "user" in session:
                 user_id = session["user"]
+                # Zip all lists from form to iterate together
+                order_data = zip(
+                    request.form.getlist("item_id"), request.form.getlist("item_name"),
+                    request.form.getlist("item_price"), request.form.getlist("item_img"),
+                    request.form.getlist("item_quantity"), request.form.getlist("item_total_price")
+                )
                 
-                item_ids = request.form.getlist("item_id")
-                item_names = request.form.getlist("item_name")
-                item_prices = request.form.getlist("item_price")
-                item_imgs = request.form.getlist("item_img")
-                quantities = request.form.getlist("item_quantity")
-                total_prices = request.form.getlist("item_total_price")
-                
-                name = request.form['user_name']
-                address = request.form['address']
-                number = request.form['number']
-                payment_method = request.form['payment_method']
+                for item_id, name, price, img, qty, total in order_data:
+                    # Insert into orders
+                    self.db.session.execute(text("""
+                        INSERT INTO orders (item_name, item_price, item_img, quantity, name, address, number, payment_method, total, user_id) 
+                        VALUES (:n, :p, :i, :q, :un, :addr, :num, :pay, :t, :u)
+                    """), {
+                        "n": name, "p": price, "i": img, "q": qty, "un": request.form['user_name'],
+                        "addr": request.form['address'], "num": request.form['number'],
+                        "pay": request.form['payment_method'], "t": total, "u": user_id
+                    })
+                    # Clear this specific item from cart
+                    self.db.session.execute(text("DELETE FROM cart WHERE id=:id AND user_id=:u"), {"id": item_id, "u": user_id})
 
-                cursor = self.mysql.connection.cursor()
-                
-                for item_id, item_name, item_price, item_img, quantity, total_price in zip(
-                        item_ids, item_names, item_prices, item_imgs, quantities, total_prices):
-                    
-                    cursor.execute("""
-                        INSERT INTO orders 
-                        (item_name, item_price, item_img, quantity, name, address, number, payment_method, total, user_id) 
-                        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-                    """, (item_name, item_price, item_img, quantity, name, address, number, payment_method, total_price, user_id))
-
-                    cursor.execute("DELETE FROM cart WHERE id=%s AND user_id=%s", (item_id, user_id))
-
-                self.mysql.connection.commit()
-                cursor.close()
-
+                self.db.session.commit()
                 return redirect(url_for("cart"))
-
             return redirect(url_for("login"))
 
-
-
-
-        
-        @self.app.route("/history", methods=["POST"])
+        @self.app.route("/history", methods=["GET", "POST"]) # Changed to allow GET if needed
         def history(): 
             if "user" in session:
                 user_id = session["user"]
-                cursor = self.mysql.connection.cursor()
-
-                cursor.execute("SELECT * FROM orders WHERE status ='order deliver' AND user_id=%s", (user_id,))
-                orders_items = cursor.fetchall()
-
-            return render_template("history.html", orders_items=orders_items)
-
+                orders_items = self.db.session.execute(
+                    text("SELECT * FROM orders WHERE status ='order deliver' AND user_id=:u"), {"u": user_id}
+                ).mappings().all()
+                return render_template("history.html", orders_items=orders_items)
+            return redirect("/login")
 
         @self.app.route("/delete", methods=["POST"])
         def delete(): 
-            delete = request.form["id"]
-
-            cursor = self.mysql.connection.cursor()
-            cursor.execute("DELETE FROM cart WHERE id=%s",(delete,))
-            self.mysql.connection.commit()
+            item_id = request.form["id"]
+            self.db.session.execute(text("DELETE FROM cart WHERE id=:id"), {"id": item_id})
+            self.db.session.commit()
             return redirect("/cart")    
         
-
         @self.app.route("/profile", methods=['GET', 'POST'])
         def profile():
-            if "user" in session:
-                user_id = session["user"]
-                cursor = self.mysql.connection.cursor()
-                cursor.execute("SELECT First_name, Last_name, Age, Address, Contact, Username, Password, Profile FROM register WHERE ID=%s", (user_id,))
-                user_info = cursor.fetchone()
+            if "user" not in session: return redirect("/login")
+            user_id = session["user"]
 
-                if request.method == 'POST':
-      
-                    if 'profile_picture' in request.files:
-                        profile_picture = request.files['profile_picture']
-                        if profile_picture and profile_picture.filename:
-                   
-                            filename = os.path.join(self.app.config["UPLOAD"], profile_picture.filename)
-                            profile_picture.save(filename)
-                            
-                          
-                            profile_path = "static/" + profile_picture.filename
-                            cursor.execute("UPDATE register SET Profile=%s WHERE ID=%s", (profile_path, user_id))
-                            self.mysql.connection.commit()
+            if request.method == 'POST':
+                if 'profile_picture' in request.files:
+                    pic = request.files['profile_picture']
+                    if pic and pic.filename:
+                        filename = os.path.join(self.app.config["UPLOAD"], pic.filename)
+                        pic.save(filename)
+                        path = "static/" + pic.filename
+                        self.db.session.execute(text("UPDATE register SET Profile=:p WHERE ID=:u"), {"p": path, "u": user_id})
+                        self.db.session.commit()
+                elif 'delete' in request.form:
+                    self.db.session.execute(text("UPDATE register SET Profile=NULL WHERE ID=:u"), {"u": user_id})
+                    self.db.session.commit()
+                return redirect(url_for('profile'))
 
-                    elif 'delete' in request.form:
-                        cursor.execute("UPDATE register SET Profile=NULL WHERE ID=%s", (user_id,))
-                        self.mysql.connection.commit()
+            user_info = self.db.session.execute(
+                text("SELECT First_name, Last_name, Age, Address, Contact, Username, Password, Profile FROM register WHERE ID=:u"), 
+                {"u": user_id}
+            ).fetchone()
+            return render_template("profile.html", user_info=user_info)
 
-                    cursor.close()
-                    return redirect(url_for('profile'))
-
-                cursor.close()
-                return render_template("profile.html", user_info=user_info)
-            else:
-                return redirect("/login")
-
-          
-        @self.app.route('/logout', methods=['POST'])
+        @self.app.route('/logout', methods=['POST', 'GET'])
         def logout():
-            session.pop('user', None)
+            session.clear()
             return redirect('/login')
 
         @self.app.route("/update_profile", methods=["GET", "POST"])
         def update_profile():
-            if "user" in session:
-                user_id = session["user"]
-                
-                if request.method == "POST":
+            if "user" not in session: return redirect("/login")
+            user_id = session["user"]
             
-                    first_name = request.form["firstname"]
-                    last_name = request.form["lastname"]
-                    age = request.form["age"]
-                    address = request.form["address"]
-                    contact = request.form["contact"]
-                    username = request.form["username"]
-                    password = request.form["password"]
-                    profile = request.files["profile"]
-                    hashed_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
-                    filename = os.path.join(self.app.config["UPLOAD"], profile.filename)
-                    profile.save(filename)
-                    
-                    profile ="static/" + profile.filename
-                    
+            if request.method == "POST":
+                # Hash the updated password
+                hashed = bcrypt.hashpw(request.form["password"].encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
                 
-                    cursor = self.mysql.connection.cursor()
-                    cursor.execute("""
-                        UPDATE register
-                        SET First_name=%s, Last_name=%s, Age=%s, Address=%s, Contact=%s, Username=%s, Password=%s, Profile=%s
-                        WHERE ID=%s
-                    """, (first_name, last_name, age, address, contact, username, hashed_password, profile, user_id))
-                    self.mysql.connection.commit()
-                    cursor.close()
-                    
-                    return redirect(url_for('profile'))
+                profile_path = None
+                if "profile" in request.files and request.files["profile"].filename:
+                    pic = request.files["profile"]
+                    filename = os.path.join(self.app.config["UPLOAD"], pic.filename)
+                    pic.save(filename)
+                    profile_path = "static/" + pic.filename
                 
-                else:
-                
-                    cursor = self.mysql.connection.cursor()
-                    cursor.execute("SELECT First_name, Last_name, Age, Address, Contact FROM register WHERE ID=%s", (user_id,))
-                    user_info = cursor.fetchone()
-                    cursor.close()
-                    
-                    return render_template("update_profile.html", user_info=user_info)
+                self.db.session.execute(text("""
+                    UPDATE register SET First_name=:f, Last_name=:l, Age=:a, Address=:addr, Contact=:c, Username=:u, Password=:p, Profile=COALESCE(:pr, Profile)
+                    WHERE ID=:id
+                """), {
+                    "f": request.form["firstname"], "l": request.form["lastname"], "a": request.form["age"],
+                    "addr": request.form["address"], "c": request.form["contact"], "u": request.form["username"],
+                    "p": hashed, "pr": profile_path, "id": user_id
+                })
+                self.db.session.commit()
+                return redirect(url_for('profile'))
             
-            else:
-                return redirect("/login")
+            user_info = self.db.session.execute(
+                text("SELECT First_name, Last_name, Age, Address, Contact FROM register WHERE ID=:u"), {"u": user_id}
+            ).fetchone()
+            return render_template("update_profile.html", user_info=user_info)
             
 
         @self.app.route("/admin")
         def admin():
-            cursor = self.mysql.connection.cursor()
-           
-            cursor.execute("""
-                SELECT item_name, DATE(date_order) as order_date, SUM(quantity) as total_quantity, item_price, SUM(quantity * item_price) as total_price
+            # Using mappings() makes record[4] access much cleaner as record['total_price']
+            query = text("""
+                SELECT item_name, DATE(date_order) as order_date, SUM(quantity) as total_quantity, 
+                       item_price, SUM(quantity * item_price) as total_price
                 FROM orders
                 WHERE status = 'order deliver'
-                GROUP BY item_name, DATE(date_order)
+                GROUP BY item_name, DATE(date_order), item_price
                 ORDER BY order_date DESC
             """)
-            sales_data = cursor.fetchall()
-            cursor.close()
-
+            sales_data = self.db.session.execute(query).all()
             
-            overall_total_price = sum(record[4] for record in sales_data) 
+            # Calculate overall total from the fetched results
+            overall_total_price = sum(record[4] for record in sales_data) if sales_data else 0
             return render_template("admin.html", sales_data=sales_data, overall_total_price=overall_total_price)
 
-
-        
         @self.app.route("/orders")
         def orders():
-                cursor = self.mysql.connection.cursor()
-                cursor.execute("SELECT * FROM orders WHERE status IS NULL OR status = ''")
-                cart_items = cursor.fetchall()
-                return render_template("orders.html", cart_items=cart_items)
+            # Fetch pending orders
+            query = text("SELECT * FROM orders WHERE status IS NULL OR status = ''")
+            cart_items = self.db.session.execute(query).mappings().all()
+            return render_template("orders.html", cart_items=cart_items)
             
         @self.app.route("/success", methods=["POST"])
         def success(): 
-             if request.method == "POST":
-                id = request.form["id"]
-                status = request.form["status"]
-                cursor = self.mysql.connection.cursor()
-                cursor.execute(
-                    "UPDATE orders SET status=%s WHERE Id=%s", 
-                    (status, id)
+            if request.method == "POST":
+                self.db.session.execute(
+                    text("UPDATE orders SET status=:s WHERE Id=:id"),
+                    {"s": request.form["status"], "id": request.form["id"]}
                 )
-                self.mysql.connection.commit()
-                cursor.close()
+                self.db.session.commit()
                 return redirect(url_for('orders'))
         
         @self.app.route("/accounts")
         def accounts():
-                cursor = self.mysql.connection.cursor()
-                cursor.execute("SELECT * FROM register")
-                user_info = cursor.fetchall()
-                return render_template("accounts.html", user_info=user_info)
+            user_info = self.db.session.execute(text("SELECT * FROM register")).mappings().all()
+            return render_template("accounts.html", user_info=user_info)
             
-        @self.app.route("/restricted", methods=["GET", "POST"])
+        @self.app.route("/restricted", methods=["POST"])
         def restricted():
-            if request.method == "POST":
-                id = request.form["Id"]
-                status = request.form["status"]
-            
-                cursor = self.mysql.connection.cursor()
-                cursor.execute(
-                    "UPDATE register SET status=%s WHERE Id=%s", 
-                    (status, id)
-                )
-                self.mysql.connection.commit()
-                cursor.close()
-
-                return redirect(url_for('accounts'))
-            
-        @self.app.route("/restricted_remove", methods=["GET", "POST"])
-        def restricted_remove():
-            if request.method == "POST":
-                id = request.form["Id"]
-                status = request.form["status"]
-            
-
-                cursor = self.mysql.connection.cursor()
-                cursor.execute(
-                    "UPDATE register SET status=%s WHERE Id=%s", 
-                    (status, id)
-                )
-                self.mysql.connection.commit()
-                cursor.close()
-
-                return redirect(url_for('accounts'))
-
-            
+            self.db.session.execute(
+                text("UPDATE register SET status=:s WHERE Id=:id"),
+                {"s": request.form["status"], "id": request.form["Id"]}
+            )
+            self.db.session.commit()
+            return redirect(url_for('accounts'))
             
         @self.app.route("/admin_delete", methods=["POST"])
         def admin_delete(): 
-            delete = request.form["Id"]
-
-            cursor = self.mysql.connection.cursor()
-            cursor.execute("DELETE FROM register WHERE Id=%s",(delete,))
-            self.mysql.connection.commit()
+            self.db.session.execute(text("DELETE FROM register WHERE Id=:id"), {"id": request.form["Id"]})
+            self.db.session.commit()
             return redirect("/accounts")
         
         @self.app.route("/edit_menu", methods=["GET", "POST"])
         def edit_menu():
             if request.method == "POST":
-                name = request.form["name"]
-                price = request.form["price"]
                 img = request.files["img"]
-                category = request.form["category"]
-                category2 = request.form["category2"]
-                filename = os.path.join(self.app.config["UPLOAD"], img.filename)
-                img.save(filename)
+                if img and img.filename:
+                    filename = os.path.join(self.app.config["UPLOAD"], img.filename)
+                    img.save(filename)
+                    img_path = "static/" + img.filename
                 
-                img ="static/" + img.filename
-            
-
-                cursor = self.mysql.connection.cursor()
-                cursor.execute(
-                    "INSERT INTO menu (name, price, img, category, category2) VALUES (%s, %s, %s, %s, %s)", 
-                    (name, price, img, category, category2)
-                )
-                self.mysql.connection.commit()
-                cursor.close()
-
+                    self.db.session.execute(text("""
+                        INSERT INTO menu (name, price, img, category, category2) 
+                        VALUES (:n, :p, :i, :c1, :c2)
+                    """), {
+                        "n": request.form["name"], "p": request.form["price"], 
+                        "i": img_path, "c1": request.form["category"], "c2": request.form["category2"]
+                    })
+                    self.db.session.commit()
                 return redirect(url_for('edit_menu'))
-
             return render_template("edit_menu.html")
         
         @self.app.route("/admin_menu")
         def admin_menu():
-           
-                cursor = self.mysql.connection.cursor()
-                cursor.execute("SELECT * FROM menu")
-                menus = cursor.fetchall()
-                return render_template("admin_menu.html", menu_list=menus)
-           
+            menus = self.db.session.execute(text("SELECT * FROM menu")).mappings().all()
+            return render_template("admin_menu.html", menu_list=menus)
             
-        @self.app.route("/update_menu", methods=["GET", "POST"])
-        def update_menu():
-            if request.method =="POST":
-                id = request.form["id"]
-                name = request.form["name"]
-                price = request.form["price"]
-                img = request.form["img"]
-                return render_template("update_menu.html", id=id, name=name, price=price, img=img)
-            
-        @self.app.route("/update_process", methods=["GET", "POST"])
+        @self.app.route("/update_process", methods=["POST"])
         def update_process():
-            if request.method =="POST":
-                id = request.form["id"]
-                name = request.form["name"]
-                price = request.form["price"]
+            id = request.form["id"]
+            img_path = None
+            
+            # Only update image if a new one is uploaded
+            if "img" in request.files and request.files["img"].filename:
                 img = request.files["img"]
-                
                 filename = os.path.join(self.app.config["UPLOAD"], img.filename)
                 img.save(filename)
-                
-                img ="static/" + img.filename
-                
-                cursor = self.mysql.connection.cursor()
-                cursor.execute("UPDATE menu SET name=%s, price=%s, img=%s WHERE id=%s", (name, price, img, id))
-                self.mysql.connection.commit()
-                return redirect("/admin_menu")
-            
+                img_path = "static/" + img.filename
+
+            query = text("""
+                UPDATE menu SET name=:n, price=:p, img=COALESCE(:i, img) WHERE id=:id
+            """)
+            self.db.session.execute(query, {
+                "n": request.form["name"], "p": request.form["price"], "i": img_path, "id": id
+            })
+            self.db.session.commit()
+            return redirect("/admin_menu")
+
         @self.app.route("/deletes", methods=["POST"])
         def deletes(): 
-            deletes = request.form["id"]
-
-            cursor = self.mysql.connection.cursor()
-            cursor.execute("DELETE FROM menu WHERE id=%s",(deletes,))
-            self.mysql.connection.commit()
+            self.db.session.execute(text("DELETE FROM menu WHERE id=:id"), {"id": request.form["id"]})
+            self.db.session.commit()
             return redirect("/admin_menu")
             
-            
+        # --- STATIC PAGES ---
         @self.app.route("/aboutus")
-        def aboutus():            
-            return render_template("aboutus.html")
-            
-            
+        def aboutus(): return render_template("aboutus.html")
             
         @self.app.route("/termsandconditions")
-        def terms(): 
-            
-            return render_template("terms.html")
-           
+        def terms(): return render_template("terms.html")
             
         @self.app.route("/privacypolicy")
-        def privacy(): 
-        
-            return render_template("privacy.html")
-           
-            
-            
+        def privacy(): return render_template("privacy.html")
             
         @self.app.route('/contact', methods=["POST", "GET"])
         def contact():
             if request.method == "POST":
-                name = request.form['name']
-                email = request.form['email']
-                message = request.form['message']
-
-            
-                cursor = self.mysql.connection.cursor()
-                cursor.execute("INSERT INTO messages (name, email, message) VALUES (%s, %s, %s)", (name, email, message))
-                self.mysql.connection.commit()
-                cursor.close()
-
+                self.db.session.execute(text("""
+                    INSERT INTO messages (name, email, message) VALUES (:n, :e, :m)
+                """), {"n": request.form['name'], "e": request.form['email'], "m": request.form['message']})
+                self.db.session.commit()
                 return redirect("/contact")
-            else:
-                return render_template("contact.html")
+            return render_template("contact.html")
         
         @self.app.route('/admin_contactus')
         def admin_contact():
-           
-            cursor = self.mysql.connection.cursor()
-            cursor.execute("SELECT name, email, message, timestamp FROM messages")
-            messages = cursor.fetchall()  
-            cursor.close()
-
+            messages = self.db.session.execute(text("SELECT * FROM messages ORDER BY id DESC")).mappings().all()
             return render_template('admin_contact.html', messages=messages)
         
-        
-# 1. Initialize your class
-x = OnlineDelivery(__name__)
+ # 1. Initialize your class
+delivery_service = OnlineDelivery(__name__)
 
-# 2. Set up the routes
-x.setup_routes()
+# 2. Set up the routes (this also sets up self.db)
+delivery_service.setup_routes()
 
 # 3. EXPOSE the Flask instance for Gunicorn
-app = x.app 
+app = delivery_service.app
 
-# --- ADD THIS PART HERE (This creates your tables on Render) ---
+# --- FIX: Use the correct instance name ---
 with app.app_context():
-    x.db.create_all()
+    delivery_service.db.create_all()
 
 # 4. Only for local PC testing
 if __name__ == "__main__":
