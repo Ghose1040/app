@@ -1,12 +1,11 @@
 from flask import Flask, render_template, redirect, request, url_for, session, flash
+from flask_sqlalchemy import SQLAlchemy
 import bcrypt
 from cryptography.fernet import Fernet
 import os
 import re
 import pymysql
 pymysql.install_as_MySQLdb()
-from flask_sqlalchemy import SQLAlchemy
-from flask_mysqldb import MySQL
 
 
 
