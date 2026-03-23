@@ -482,7 +482,7 @@ class OnlineDelivery:
             return self.handle_add_to_cart('dessert')
 
 
-@self.app.route("/cart")
+        @self.app.route("/cart")
         def cart():
             if "user" in session:
                 user_id = session["user"]
