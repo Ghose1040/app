@@ -755,7 +755,13 @@ class OnlineDelivery:
                 messages = self.db.session.execute(text("SELECT * FROM messages ORDER BY id DESC")).mappings().all()
                 return render_template('admin_contact.html', messages=messages)
 
+# 1. Create the class instance
 delivery_service = OnlineDelivery(__name__)
+
+# 2. MANUALLY trigger the route setup to be safe
+delivery_service.setup_routes()
+
+# 3. Expose the app for Render/Gunicorn
 app = delivery_service.app
 
 if __name__ == "__main__":
