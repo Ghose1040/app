@@ -35,7 +35,7 @@ pymysql.install_as_MySQLdb()
             self.db = SQLAlchemy(self.app)
             
             # Now set up the routes
-            self.setup_routes()
+            def setup_routes(self):
 
 #public  
         # --- PUBLIC ROUTES ---
