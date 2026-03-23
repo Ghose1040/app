@@ -36,6 +36,15 @@ class OnlineDelivery:
         self.db = SQLAlchemy(self.app)
         self.setup_routes()
         
+# --- SECURITY HELPERS ---
+        # These should be methods inside the class or standalone functions
+    def hash_password(self, password):
+        return bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+
+    def check_password(self, password, hashed):
+        return bcrypt.checkpw(password.encode('utf-8'), hashed.encode('utf-8'))
+
+        
         
     def setup_routes(self):
         @self.app.route("/")
@@ -101,14 +110,6 @@ class OnlineDelivery:
             menus = result.mappings().all()
             return render_template("drinks_public.html", menu_list=menus)
             
-    # --- SECURITY HELPERS ---
-        # These should be methods inside the class or standalone functions
-        def hash_password(self, password):
-            return bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
-
-        def check_password(self, password, hashed):
-            return bcrypt.checkpw(password.encode('utf-8'), hashed.encode('utf-8'))
-
         # --- LOGIN & REGISTER ROUTES ---
             # ... (Keep your other routes) ...
 
@@ -179,21 +180,22 @@ class OnlineDelivery:
     
         @self.app.route("/home")
         def home():
-            if "user" in session:
-                user_id = session["user"]
-                
-                
-                    # Fetch Menu
-                menus = self.db.session.execute(text("SELECT * FROM menu")).mappings().all()
-                    
-                    # Fetch Cart Count
-                cart_res = self.db.session.execute(
-                    text("SELECT COUNT(*) FROM cart WHERE user_id = :u"), {"u": user_id}
-                ).fetchone()
-                cart_count = cart_res[0] if cart_res else 0
-                    
-                return render_template("home.html", menu_list=menus, cart_count=cart_count)
-            return redirect("/login")
+            if "user" not in session:
+                return redirect("/login")
+
+            user_id = session["user"]
+
+            menus = self.db.session.execute(
+                text("SELECT * FROM menu")
+            ).mappings().all()
+
+            cart_count = self.db.session.execute(
+                text("SELECT COUNT(*) FROM cart WHERE user_id=:u"),
+                {"u": user_id}
+            ).scalar()
+
+            return render_template("home.html", menu_list=menus, cart_count=cart_count)
+
     
         @self.app.route("/search", methods=["GET", "POST"])
         def search():
@@ -417,24 +419,20 @@ class OnlineDelivery:
     
         @self.app.route("/cart")
         def cart():
-            if "user" in session:
-                user_id = session["user"]
-                
-                    # Fetch cart items as dictionaries for easier access
-                cart_items = self.db.session.execute(
-                    text("SELECT * FROM cart WHERE user_id=:u"), {"u": user_id}
-                ).mappings().all()
-    
-                    # Calculate total using key names
-                total_price = sum(item['item_price'] * item['quantity'] for item in cart_items)
-                    
-                user_info = self.db.session.execute(
-                    text("SELECT First_name, Last_name, Address, Contact FROM register WHERE ID=:u"), 
-                    {"u": user_id}
-                ).fetchone()
-    
-                return render_template("cart.html", cart_items=cart_items, total_price=total_price, user_info=user_info)
-            return redirect("/login")
+            if "user" not in session:
+                return redirect("/login")
+
+            user_id = session["user"]
+
+            items = self.db.session.execute(
+                text("SELECT * FROM cart WHERE user_id=:u"),
+                {"u": user_id}
+            ).mappings().all()
+
+            total = sum(i["quantity"] * i["item_price"] for i in items)
+
+            return render_template("cart.html", cart_items=items, total_price=total)
+
                 
         @self.app.route("/confirmation", methods=["POST"])
         def confirmation():
