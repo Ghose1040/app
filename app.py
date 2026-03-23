@@ -44,6 +44,36 @@ class OnlineDelivery:
     def check_password(self, password, hashed):
         return bcrypt.checkpw(password.encode('utf-8'), hashed.encode('utf-8'))
 
+    # --- HELPER: Unified Add to Cart Logic ---
+    def handle_add_to_cart(self, redirect_to):
+        if "user" not in session:
+            return redirect("/login")
+            
+        item_name = request.form['item_name']
+        item_price = float(request.form['item_price'])
+        item_img = request.form['item_img'] 
+        quantity = int(request.form['quantity'])
+        user_id = session["user"]
+        total_price = item_price * quantity
+
+        query_check = text("SELECT quantity FROM cart WHERE item_name = :n AND user_id = :u")
+        existing = self.db.session.execute(query_check, {"n": item_name, "u": user_id}).fetchone()
+
+        if existing:
+            new_qty = existing[0] + quantity
+            new_total = new_qty * item_price
+            self.db.session.execute(
+                text("UPDATE cart SET quantity = :q, total_price = :t WHERE item_name = :n AND user_id = :u"),
+                {"q": new_qty, "t": new_total, "n": item_name, "u": user_id}
+            )
+        else:
+            self.db.session.execute(
+                text("""INSERT INTO cart (item_name, quantity, item_price, item_img, total_price, user_id) 
+                        VALUES (:n, :q, :p, :i, :t, :u)"""),
+                {"n": item_name, "q": quantity, "p": item_price, "i": item_img, "t": total_price, "u": user_id}
+            )
+        self.db.session.commit()
+        return redirect(url_for(redirect_to))
         
         
     def setup_routes(self):
@@ -122,25 +152,20 @@ class OnlineDelivery:
             user_textbox = request.form.get("username")
             pass_textbox = request.form.get("password")
 
-            # Static admin check
             if user_textbox == "admin" and pass_textbox == "francis":
                 session["role"] = "admin"
                 session["user"] = "admin"
                 return redirect("/admin")
             
-            # Database User Check
             query = text("SELECT id, Password, status FROM register WHERE Username = :u")
             result = self.db.session.execute(query, {"u": user_textbox}).fetchone()
             
             if result:
                 user_id, hashed_password, status = result
-                
-                # Verify bcrypt hash
                 if self.check_password(pass_textbox, hashed_password):
                     if status == "Restricted":
                         flash("Your account is Restricted.")
                         return redirect("/login")
-                    
                     session["user"] = user_id
                     session["role"] = "user"
                     return redirect("/home")
@@ -151,27 +176,18 @@ class OnlineDelivery:
         @self.app.route("/register", methods=["GET", "POST"])
         def register():
             if request.method == "POST":
-                # Hash the password before saving
                 hashed = self.hash_password(request.form["password"])
-                    
                 query = text("""
                     INSERT INTO register (First_name, Last_name, Age, Address, Contact, Username, Password) 
                     VALUES (:f, :l, :a, :addr, :c, :u, :p)
                 """)
-                
                 self.db.session.execute(query, {
-                    "f": request.form["firstname"], 
-                    "l": request.form["lastname"], 
-                    "a": request.form["age"], 
-                    "addr": request.form["address"], 
-                    "c": request.form["contact"], 
-                    "u": request.form["username"], 
-                    "p": hashed
+                    "f": request.form["firstname"], "l": request.form["lastname"], 
+                    "a": request.form["age"], "addr": request.form["address"], 
+                    "c": request.form["contact"], "u": request.form["username"], "p": hashed
                 })
-                
-                self.db.session.commit() # Essential for Aiven
+                self.db.session.commit()
                 return redirect(url_for('login'))
-                
             return render_template("register.html")
     ######################
     #Menus
@@ -180,22 +196,14 @@ class OnlineDelivery:
     
         @self.app.route("/home")
         def home():
-            if "user" not in session:
-                return redirect("/login")
-
-            user_id = session["user"]
-
-            menus = self.db.session.execute(
-                text("SELECT * FROM menu")
-            ).mappings().all()
-
-            cart_count = self.db.session.execute(
-                text("SELECT COUNT(*) FROM cart WHERE user_id=:u"),
-                {"u": user_id}
-            ).scalar()
-
-            return render_template("home.html", menu_list=menus, cart_count=cart_count)
-
+            if "user" in session:
+                user_id = session["user"]
+                menus = self.db.session.execute(text("SELECT * FROM menu")).mappings().all()
+                cart_res = self.db.session.execute(
+                    text("SELECT COUNT(*) FROM cart WHERE user_id = :u"), {"u": user_id}
+                ).fetchone()
+                return render_template("home.html", menu_list=menus, cart_count=cart_res[0] if cart_res else 0)
+            return redirect("/login")
     
         @self.app.route("/search", methods=["GET", "POST"])
         def search():
@@ -332,7 +340,8 @@ class OnlineDelivery:
         def add_to_cart_search(): return self.handle_add_to_cart('search')
     
         @self.app.route("/add_to_cart", methods=["POST"])
-        def add_to_cart(): return self.handle_add_to_cart('home')
+        def add_to_cart():
+            return self.handle_add_to_cart('home')
     
         @self.app.route("/add_to_cart_bestsellers", methods=["POST"])
         def add_to_cart_bestsellers(): return self.handle_add_to_cart('bestsellers')
@@ -419,20 +428,12 @@ class OnlineDelivery:
     
         @self.app.route("/cart")
         def cart():
-            if "user" not in session:
-                return redirect("/login")
-
-            user_id = session["user"]
-
-            items = self.db.session.execute(
-                text("SELECT * FROM cart WHERE user_id=:u"),
-                {"u": user_id}
-            ).mappings().all()
-
-            total = sum(i["quantity"] * i["item_price"] for i in items)
-
-            return render_template("cart.html", cart_items=items, total_price=total)
-
+            if "user" in session:
+                user_id = session["user"]
+                items = self.db.session.execute(text("SELECT * FROM cart WHERE user_id=:u"), {"u": user_id}).mappings().all()
+                total = sum(i["quantity"] * i["item_price"] for i in items)
+                return render_template("cart.html", cart_items=items, total_price=total)
+            return redirect("/login")
                 
         @self.app.route("/confirmation", methods=["POST"])
         def confirmation():
@@ -575,21 +576,14 @@ class OnlineDelivery:
     
         @self.app.route("/admin")
         def admin():
-                # Using mappings() makes record[4] access much cleaner as record['total_price']
+            if session.get("role") != "admin": return redirect("/login")
             query = text("""
-                SELECT item_name, DATE(date_order) as order_date, SUM(quantity) as total_quantity, 
-                       item_price, SUM(quantity * item_price) as total_price
-                FROM orders
-                WHERE status = 'order deliver'
-                GROUP BY item_name, DATE(date_order), item_price
-                ORDER BY order_date DESC
+                SELECT item_name, DATE(date_order) as order_date, SUM(quantity), item_price, SUM(quantity * item_price) 
+                FROM orders WHERE status = 'order deliver' GROUP BY item_name, DATE(date_order), item_price ORDER BY order_date DESC
             """)
             sales_data = self.db.session.execute(query).all()
-                
-                # Calculate overall total from the fetched results
-            overall_total_price = sum(record[4] for record in sales_data) if sales_data else 0
-            return render_template("admin.html", sales_data=sales_data, overall_total_price=overall_total_price)
-    
+            total = sum(record[4] for record in sales_data) if sales_data else 0
+            return render_template("admin.html", sales_data=sales_data, overall_total_price=total)
         @self.app.route("/orders")
         def orders():
                 # Fetch pending orders
