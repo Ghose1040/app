@@ -3,10 +3,10 @@ import bcrypt
 from cryptography.fernet import Fernet
 import os
 import re
-from flask_mysqldb import MySQL
 import pymysql
 pymysql.install_as_MySQLdb()
 from flask_sqlalchemy import SQLAlchemy
+
 
 
 class OnlineDelivery:
