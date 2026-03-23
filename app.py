@@ -13,43 +13,29 @@ class OnlineDelivery:
     def __init__(self, name): 
         self.app = Flask(name)
         self.app.secret_key = "hshshshshs"
-
-        # Check if we are on Render (If DATABASE_URL exists)
-        if os.getenv("mysql://avnadmin:AVNS_gI-h-b14hOWxhamdNT_@mysql-13dadf74-franciselmido867-3a7e.i.aivencloud.com:28542/defaultdb?ssl-mode=REQUIRED"):
-            self.app.config['MYSQL_HOST'] = "mysql-13dadf74-franciselmido867-3a7e.i.aivencloud.com"
-            self.app.config['MYSQL_USER'] = "avnadmin"
-            # We tell Flask to look for the password on Render, not here!
-            self.app.config['MYSQL_PASSWORD'] = os.getenv("AVNS_gI-h-b14hOWxhamdNT_")
-            self.app.config['MYSQL_PORT'] = 28542
-            self.app.config['MYSQL_DB'] = "defaultdb"
-        else:
-            # LOCAL PC SETTINGS (XAMPP)
-            self.app.config['MYSQL_HOST'] = "localhost"
-            self.app.config['MYSQL_USER'] = "root"
-            self.app.config['MYSQL_PASSWORD'] = ""
-            self.app.config['MYSQL_DB'] = "online_delivery"
-
-        self.mysql = MySQL(self.app)
         self.app.config["UPLOAD"] = "static"
 
-    def setup_routes(self):
-        
-        # 1. Look for the "nickname" DATABASE_URL on Render
+        # 1. Get the URI from Render's Environment Variables
+        # On Render, you should create an Environment Variable named DATABASE_URL
+        # and paste your Aiven link: mysql://avnadmin:password@host:port/defaultdb
         uri = os.getenv("DATABASE_URL")
 
-        # 2. Convert it for SQLAlchemy if it exists (for Aiven)
-        if uri and uri.startswith("mysql://"):
-            uri = uri.replace("mysql://", "mysql+pymysql://", 1)
-
-        # 3. Apply the URI or use local fallback
         if uri:
+            # Fix the prefix for SQLAlchemy/PyMySQL
+            if uri.startswith("mysql://"):
+                uri = uri.replace("mysql://", "mysql+pymysql://", 1)
             self.app.config['SQLALCHEMY_DATABASE_URI'] = uri
         else:
-            # This is for your local XAMPP/WAMP testing
+            # LOCAL PC SETTINGS (XAMPP)
             self.app.config['SQLALCHEMY_DATABASE_URI'] = "mysql+pymysql://root:@localhost/online_delivery"
 
         self.app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+        
+        # Initialize the database here so it's available to all routes
         self.db = SQLAlchemy(self.app)
+        
+        # Now set up the routes
+        self.setup_routes()
 
 #public  
         # --- PUBLIC ROUTES ---
