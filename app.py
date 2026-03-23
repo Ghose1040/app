@@ -9,33 +9,33 @@ pymysql.install_as_MySQLdb()
 
 
 
-class OnlineDelivery:
-    def __init__(self, name): 
-        self.app = Flask(name)
-        self.app.secret_key = "hshshshshs"
-        self.app.config["UPLOAD"] = "static"
-
-        # 1. Get the URI from Render's Environment Variables
-        # On Render, you should create an Environment Variable named DATABASE_URL
-        # and paste your Aiven link: mysql://avnadmin:password@host:port/defaultdb
-        uri = os.getenv("DATABASE_URL")
-
-        if uri:
-            # Fix the prefix for SQLAlchemy/PyMySQL
-            if uri.startswith("mysql://"):
-                uri = uri.replace("mysql://", "mysql+pymysql://", 1)
-            self.app.config['SQLALCHEMY_DATABASE_URI'] = uri
-        else:
-            # LOCAL PC SETTINGS (XAMPP)
-            self.app.config['SQLALCHEMY_DATABASE_URI'] = "mysql+pymysql://root:@localhost/online_delivery"
-
-        self.app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-        
-        # Initialize the database here so it's available to all routes
-        self.db = SQLAlchemy(self.app)
-        
-        # Now set up the routes
-        self.setup_routes()
+    class OnlineDelivery:
+        def __init__(self, name): 
+            self.app = Flask(name)
+            self.app.secret_key = "hshshshshs"
+            self.app.config["UPLOAD"] = "static"
+    
+            # 1. Get the URI from Render's Environment Variables
+            # On Render, you should create an Environment Variable named DATABASE_URL
+            # and paste your Aiven link: mysql://avnadmin:password@host:port/defaultdb
+            uri = os.getenv("DATABASE_URL")
+    
+            if uri:
+                # Fix the prefix for SQLAlchemy/PyMySQL
+                if uri.startswith("mysql://"):
+                    uri = uri.replace("mysql://", "mysql+pymysql://", 1)
+                self.app.config['SQLALCHEMY_DATABASE_URI'] = uri
+            else:
+                # LOCAL PC SETTINGS (XAMPP)
+                self.app.config['SQLALCHEMY_DATABASE_URI'] = "mysql+pymysql://root:@localhost/online_delivery"
+    
+            self.app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+            
+            # Initialize the database here so it's available to all routes
+            self.db = SQLAlchemy(self.app)
+            
+            # Now set up the routes
+            self.setup_routes()
 
 #public  
         # --- PUBLIC ROUTES ---
