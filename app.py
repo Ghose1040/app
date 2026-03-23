@@ -1,11 +1,12 @@
 from flask import Flask, render_template, redirect, request, url_for, session, flash
-from flask_mysqldb import MySQL
 import bcrypt
 from cryptography.fernet import Fernet
 import os
 import re
-from flask_sqlalchemy import SQLAlchemy
 from flask_mysqldb import MySQL
+import pymysql
+pymysql.install_as_MySQLdb()
+from flask_sqlalchemy import SQLAlchemy
 
 
 class OnlineDelivery:
@@ -15,7 +16,7 @@ class OnlineDelivery:
 
         # Check if we are on Render (If DATABASE_URL exists)
         if os.getenv("DATABASE_URL"):
-            self.app.config['MYSQL_HOST'] = "mysql-1c58a53b-franciselmido867-3a7e.b.aivencloud.com"
+            self.app.config['MYSQL_HOST'] = "mysql-13dadf74-franciselmido867-3a7e.i.aivencloud.com"
             self.app.config['MYSQL_USER'] = "avnadmin"
             # We tell Flask to look for the password on Render, not here!
             self.app.config['MYSQL_PASSWORD'] = os.getenv("DB_PASSWORD")
